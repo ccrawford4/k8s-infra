@@ -5,7 +5,7 @@
 #
 
 # AWS variables
-AWS_PROFILE=devops
+AWS_PROFILE=default
 AWS_REGION=us-east-1
 # project name
 PROJECT_NAME=eks-blue-green

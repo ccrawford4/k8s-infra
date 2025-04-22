@@ -11,3 +11,4 @@ tfplan
 .key
 .ecr
 kubeconfig_*
+.terraform.tfstate.lock.info
