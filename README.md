@@ -1,2 +1,5 @@
-# k8s-infra
-Kubernetes Infrastructure Repo
+# eks-blue-green 
+
+Testing **Kubernetes Blue/Green Deployment** on **EKS**.
+
+![architecture.svg](architecture.svg)

@@ -1,20 +1,21 @@
-variable "aws_region" {
-  type = string
+# variable "AWS_ACCESS_KEY_ID" {
+#   default   = ""
+#   sensitive = true
+# }
+
+# variable "AWS_SECRET_ACCESS_KEY" {
+#   default   = ""
+#   sensitive = true
+# }
+
+variable "project_name" {
+  default = "eks-blue-green"
 }
 
-# ------------ VPC -------------------
-variable "vpc_cidr_block" {
-  type = string    
+variable "region" {
+  default = "eu-west-3"
 }
 
-variable "subnet_count" {
-  type = map(number) 
-}
-
-variable "public_subnet_cidr_blocks" {
-  type = list(string)
-}
-
-variable "private_subnet_cidr_blocks" {
-  type = list(string)
+variable "profile" {
+  default = "default"
 }
