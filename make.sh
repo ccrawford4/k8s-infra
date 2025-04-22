@@ -38,20 +38,13 @@ usage() {
       or invoke this file directly: ./make.sh dev'
 }
 
-#
-# npm install + terraform init + create ecr repository
-#
 setup() {
-  cd "$PROJECT_DIR/website"
-  npm install
-
   # terraform init
   cd "$PROJECT_DIR/infra"
   terraform init
 
   cd "$PROJECT_DIR"
   bash scripts/ecr-create.sh
-  # bash scripts/user-create.sh
 }
 
 # terraform validate
