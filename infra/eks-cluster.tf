@@ -20,7 +20,3 @@ module "eks" {
     }
   }
 }
-
-data "aws_eks_cluster" "cluster" {
-  name = var.project_name
-}
