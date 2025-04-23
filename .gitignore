@@ -12,3 +12,4 @@ tfplan
 .ecr
 kubeconfig_*
 .terraform.tfstate.lock.info
+k8s/helm/**/charts/**
