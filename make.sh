@@ -1,8 +1,6 @@
 #!/bin/bash
 
-#
-# variables
-#
+MICROSERVICES=("web" "searchapi")
 
 # AWS variables
 AWS_PROFILE=default
@@ -44,7 +42,7 @@ setup() {
   terraform init
 
   cd "$PROJECT_DIR"
-  bash scripts/ecr-create.sh
+  bash scripts/ecr-create.sh "${MICROSERVICES[@]}"
 }
 
 # terraform validate
