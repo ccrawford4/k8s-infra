@@ -1,0 +1,11 @@
+namespace: uat
+resources:
+  - ../../base/web
+  - ../../base/searchapi
+  - ../../base/redis
+  - namespace.yaml
+images:
+  - name: 975050071740.dkr.ecr.us-east-1.amazonaws.com/web:1.0.0
+    newTag: uat
+  - name: 975050071740.dkr.ecr.us-east-1.amazonaws.com/searchapi:1.1.0
+    newTag: uat
