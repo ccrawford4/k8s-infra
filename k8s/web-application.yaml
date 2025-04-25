@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/ccrawford4/k8s-infra
-    path: charts/frontend
+    path: charts/web
     targetRevision: HEAD
   destination:
     server: https://kubernetes.default.svc

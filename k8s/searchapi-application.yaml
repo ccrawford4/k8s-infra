@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/ccrawford4/k8s-infra
-    path: charts/backend
+    path: charts/searchapi
     targetRevision: HEAD
   destination:
     server: https://kubernetes.default.svc
