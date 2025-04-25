@@ -15,4 +15,5 @@ kubeconfig_*
 values.yaml
 secrets.yaml
 *.tgz
+Chart.lock
 
