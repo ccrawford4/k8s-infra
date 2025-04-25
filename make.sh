@@ -170,10 +170,11 @@ destroy() {
   cd "$PROJECT_DIR/infra"
   terraform destroy -auto-approve
 
-  # delete ecr repository
+}
+
+destroy-ecr() {
   cd "$PROJECT_DIR"
   bash scripts/ecr-delete.sh
-  # bash scripts/user-delete.sh
 }
 
 # if `$1` is a function, execute it. Otherwise, print usage
