@@ -16,4 +16,5 @@ values.yaml
 secrets.yaml
 *.tgz
 Chart.lock
+.env
 

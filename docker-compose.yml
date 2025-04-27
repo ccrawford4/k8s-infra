@@ -1,24 +1,44 @@
 services:
   redis:
-    image: redislabs/redismod
+    image: redis:latest
     ports:
       - "6379:6379"
+    command: redis-server --requirepass random
+    volumes:
+      - redis-data:/data
+    restart: always
   mysql:
     image: mysql:latest
     ports:
       - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: random
+      MYSQL_DATABASE: dev
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
   searchapi:
     image: ${SEARCHAPI_IMAGE_URI}
     ports:
       - "8080:8080"
     depends_on:
-      - mysql
-      - redis
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      DSN: root:random@tcp(mysql:3306)/dev
+      REDIS_HOST: redis:6379
+      REDIS_PASSWORD: random
   web:
     image: ${WEB_IMAGE_URI}
     ports:
-      - "3300:3000"
+      - "3000:3000"
     depends_on:
       - searchapi
+
+volumes:
+  redis-data:
+    driver: local
