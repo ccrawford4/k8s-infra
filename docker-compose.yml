@@ -29,7 +29,7 @@ services:
       redis:
         condition: service_started
     environment:
-      DSN: root:random@tcp(mysql:3306)/dev
+      DSN: root:random@tcp(mysql:3306)/dev?charset=utf8mb4&parseTime=true&loc=Local
       REDIS_HOST: redis:6379
       REDIS_PASSWORD: random
   web:
@@ -38,6 +38,14 @@ services:
       - "3000:3000"
     depends_on:
       - searchapi
+    environment:
+      API_ENDPOINT: ${API_ENDPOINT}
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_SECRET: ${GITHUB_SECRET}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      GOOGLE_ID: ${GOOGLE_ID}
+      GOOGLE_SECRET: ${GOOGLE_SECRET}
 
 volumes:
   redis-data:
