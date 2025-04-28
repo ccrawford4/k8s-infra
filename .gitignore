@@ -17,4 +17,5 @@ secrets.yaml
 *.tgz
 Chart.lock
 .env
+charts/**/templates/secret.yaml
 

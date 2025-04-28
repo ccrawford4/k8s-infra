@@ -1,21 +1,77 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }} 
+  name: {{ include "web.fullname" . }}
+  labels:
+    {{- include "web.labels" . | nindent 4 }}
 spec:
-  replicas: 3 
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
-      app: {{ .Release.Name }}
+      {{- include "web.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
-        app: {{ .Release.Name }}
+        {{- include "web.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "web.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: "API_ENDPOINT"
+              valueFrom:
+                secretKeyRef:
+                  key: API_ENDPOINT
+                  name: {{ .Release.Name }}-auth
+            - name: "NEXTAUTH_URL"
+              valueFrom:
+                secretKeyRef:
+                  key: NEXTAUTH_URL
+                  name: {{ .Release.Name }}-auth
+            - name: "GITHUB_CLIENT_ID"
+              valueFrom:
+                secretKeyRef:
+                  key: GITHUB_CLIENT_ID 
+                  name: {{ .Release.Name }}-auth
+            - name: "GITHUB_SECRET"
+              valueFrom:
+                secretKeyRef:
+                  key: GITHUB_SECRET 
+                  name: {{ .Release.Name }}-auth
+            - name: "NEXTAUTH_SECRET"
+              valueFrom:
+                secretKeyRef:
+                  key: NEXTAUTH_SECRET
+                  name: {{ .Release.Name }}-auth
+            - name: "GOOGLE_ID"
+              valueFrom:
+                secretKeyRef:
+                  key: GOOGLE_ID 
+                  name: {{ .Release.Name }}-auth
+            - name: "GOOGLE_SECRET"
+              valueFrom:
+                secretKeyRef:
+                  key: GOOGLE_SECRET 
+                  name: {{ .Release.Name }}-auth
           ports:
             - name: http
               containerPort: {{ .Values.containerPort }}
