@@ -15,3 +15,12 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       environment: qa
+    secrets:
+      AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+      MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+      MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
+      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+      MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}

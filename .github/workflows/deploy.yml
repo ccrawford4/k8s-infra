@@ -6,13 +6,26 @@ on:
       environment:
         type: string
         required: true
+    secrets:
+      AWS_ACCOUNT:
+        required: true
+      AWS_ROLE_TO_ASSUME:
+        required: true
+      AWS_REGION:
+        required: true
+      AWS_EKS_CLUSTER_NAME:
+        required: true
+      MYSQL_DATABASE:
+        required: true
+      MYSQL_USERNAME:
+        required: true
+      MYSQL_PASSWORD:
+        required: true
+      MYSQL_ROOT_PASSWORD:
+        required: true
 
 jobs:
   deploy:
-    env:
-      AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
-      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-      AWS_REGION: ${{ secrets.AWS_REGION }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -21,8 +34,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT }}:role/${{ env.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Set charts to deploy
         id: set-charts
@@ -51,9 +64,9 @@ jobs:
         with:
           # aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           # aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          cluster-role-arn: arn:aws:iam::${{ env.AWS_ACCOUNT }}:role/${{ secrets.AWS_ROLE_TO_ASSUME }}
+          cluster-role-arn: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: us-west-2
-          cluster-name: ${{ secrets.EKS_CLUSTER_NAME }}
+          cluster-name: ${{ secrets.AWS_EKS_CLUSTER_NAME }}
           namespace: ${{ inputs.environment }}
           chart-path: ./charts/mysql
           name: mysql
