@@ -1,4 +1,17 @@
-# name: Nightly Build
-#
-# jobs:
-#   # Build step
+name: Nightly Build
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  # build:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Build + Test on Temporary Machine
+  #       uses: test
+
+  deploy:
+    uses: ./deploy.yml
+    with:
+      environment: qa

@@ -12,7 +12,6 @@ tfplan
 .ecr
 kubeconfig_*
 .terraform.tfstate.lock.info
-values.yaml
 *.tgz
 Chart.lock
 .env

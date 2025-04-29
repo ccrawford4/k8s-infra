@@ -1,21 +1,80 @@
-name: Deploy
+name: Deploy Helm Charts
 
 on:
-  push:
-    branches: [main]
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Deploy Helm Charts
+      - name: Set charts to deploy
+        id: set-charts
+        run: |
+          if [ ${{ inputs.environment }} == "qa" ]; then
+            echo "charts=searchapi mysql web redis" >> $GITHUB_ENV
+          else
+            echo "charts=searchapi web redis" >> $GITHUB_ENV
+          fi
+
+      # - name: Deploy searchapi chart
+      #   if: contains(env.charts, 'searchapi')
+      #   uses: bitovi/github-actions-deploy-eks-helm@v1.2.12
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: us-west-2
+      #     cluster-name: mycluster
+      #     namespace: ${{ inputs.environment }}
+      #     chart-path: ./charts/searchapi
+      #     name: searchapi
+      #     values: containerPort=8080,DNS=${{ secrets.DSN }},REDIS_HOST=${{ secrets.REDIS_HOST }},REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+      - name: Deploy mysql chart
+        if: contains(env.charts, 'mysql')
         uses: bitovi/github-actions-deploy-eks-helm@v1.2.12
         with:
-          aws-region: ${{ secrets.AWS_REGION }}
-          cluster-name: ${{ secrets.AWS_EKS_CLUSTER_NAME }}
+          # aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          # aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          cluster-role-arn: arn:aws:iam::${{ env.AWS_ACCOUNT }}:role/${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: us-west-2
+          cluster-name: ${{ secrets.EKS_CLUSTER_NAME }}
+          namespace: ${{ inputs.environment }}
+          chart-path: ./charts/mysql
+          name: mysql
+          values: database=${{ secrets.MYSQL_DATABASE }},username=${{ secrets.MYSQL_USERNAME }},password=${{ secrets.MYSQL_PASSWORD }},root_password=${{ secrets.MYSQL_ROOT_PASSWORD }}
+      # - name: Deploy web chart
+      #   if: contains(env.charts, 'web')
+      #   uses: bitovi/github-actions-deploy-eks-helm@v1.2.12
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: us-west-2
+      #     cluster-name: mycluster
+      #     namespace: ${{ inputs.environment }}
+      #     chart-path: ./charts/web
+      #     name: web
+      #     values: image.tag=latest
+      # - name: Deploy redis chart
+      #   if: contains(env.charts, 'redis')
+      #   uses: bitovi/github-actions-deploy-eks-helm@v1.2.12
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: us-west-2
+      #     cluster-name: mycluster
+      #     namespace: ${{ inputs.environment }}
+      #     chart-path: ./charts/redis
+      #     name: redis
+      #     values: redis.username=${{ secrets.REDIS_USERNAME }},redis.password=${{ secrets.REDIS_PASSWORD }},image.tag=latest
