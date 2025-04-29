@@ -13,9 +13,6 @@ tfplan
 kubeconfig_*
 .terraform.tfstate.lock.info
 values.yaml
-secrets.yaml
 *.tgz
 Chart.lock
 .env
-charts/**/templates/secret.yaml
-
