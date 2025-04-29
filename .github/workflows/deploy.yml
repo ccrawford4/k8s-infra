@@ -73,6 +73,7 @@ jobs:
           cluster-name: ${{ secrets.AWS_EKS_CLUSTER_NAME }}
           namespace: ${{ inputs.environment }}
           chart-path: ./charts/mysql
+          config-files: ./charts/mysql/values.yaml
           name: mysql
           values: database=${{ secrets.MYSQL_DATABASE }},username=${{ secrets.MYSQL_USERNAME }},password=${{ secrets.MYSQL_PASSWORD }},root_password=${{ secrets.MYSQL_ROOT_PASSWORD }}
       # - name: Deploy web chart
