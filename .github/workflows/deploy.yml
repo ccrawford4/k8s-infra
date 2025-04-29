@@ -41,6 +41,13 @@ jobs:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --region ${{ secrets.AWS_REGION }} \
+            --name ${{ secrets.AWS_EKS_CLUSTER_NAME }} \
+            --kubeconfig ./kubeconfig.yaml
+
       - name: Set charts to deploy
         id: set-charts
         run: |
@@ -88,6 +95,8 @@ jobs:
             username: ${{ secrets.MYSQL_USERNAME }}
             password: ${{ secrets.MYSQL_PASSWORD }}
             root_password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+        env:
+          KUBECONFIG_FILE: ./kubeconfig.yaml
 
       # - name: Deploy web chart
       #   if: contains(env.charts, 'web')
