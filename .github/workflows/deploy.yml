@@ -96,7 +96,7 @@ jobs:
             password: ${{ secrets.MYSQL_PASSWORD }}
             root_password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         env:
-          KUBECONFIG_FILE: ./kubeconfig.yaml
+          KUBECONFIG: ./kubeconfig.yaml
 
       # - name: Deploy web chart
       #   if: contains(env.charts, 'web')
