@@ -138,6 +138,8 @@ jobs:
           namespace: ${{ inputs.environment }}
           chart: oci://ghcr.io/nginx/charts/nginx-ingress
           version: 2.1.0
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
 
       - name: Deploy the Ingress service
         run: kubectl -n ${{ inputs.environment }} apply -f k8s/ingress.yaml
