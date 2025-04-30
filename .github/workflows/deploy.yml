@@ -138,6 +138,7 @@ jobs:
           namespace: ${{ inputs.environment }}
           chart: app
           repo: https://kubernetes.github.io/ingress-nginx
+          repo-alias: ingress-controller
         env:
           KUBECONFIG: ./kubeconfig.yaml
 
