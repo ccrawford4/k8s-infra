@@ -9,7 +9,11 @@ on:
     secrets:
       AWS_ACCOUNT:
         required: true
-      AWS_ROLE_TO_ASSUME:
+      # AWS_ROLE_TO_ASSUME:
+      #   required: true
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
         required: true
       AWS_REGION:
         required: true

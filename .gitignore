@@ -2,7 +2,6 @@
 node_modules
 package-lock.json
 .terraform
-.terraform.lock.hcl
 terraform.plan
 terraform.tfvars
 tfplan
@@ -15,3 +14,4 @@ kubeconfig_*
 *.tgz
 Chart.lock
 .env
+secrets.auto.tfvars

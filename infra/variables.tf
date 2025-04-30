@@ -9,3 +9,7 @@ variable "region" {
 variable "profile" {
   default = "default"
 }
+
+variable "iam_role_arn" {
+  type = string
+}
