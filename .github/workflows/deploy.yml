@@ -136,8 +136,8 @@ jobs:
         with:
           release: ingress-nginx
           namespace: ${{ inputs.environment }}
-          chart: oci://ghcr.io/nginx/charts/nginx-ingress
-          version: 2.1.0
+          chart: app
+          repo: https://kubernetes.github.io/ingress-nginx
         env:
           KUBECONFIG: ./kubeconfig.yaml
 
