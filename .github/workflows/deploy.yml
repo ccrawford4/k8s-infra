@@ -139,6 +139,8 @@ jobs:
           chart: app
           repo: https://kubernetes.github.io/ingress-nginx
           repo-alias: ingress-controller
+          values: |
+            app.version: 1.12.2
         env:
           KUBECONFIG: ./kubeconfig.yaml
 
