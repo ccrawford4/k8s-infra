@@ -54,6 +54,10 @@ jobs:
             --name ${{ secrets.AWS_EKS_CLUSTER_NAME }} \
             --kubeconfig ./kubeconfig.yaml
 
+      - name: Create namespace if not exists
+        run: |
+          kubectl --kubeconfig=./kubeconfig.yaml get namespace ${{ inputs.environment }} || kubectl --kubeconfig=./kubeconfig.yaml create namespace ${{ inputs.environment }}
+
       - name: Set charts to deploy
         id: set-charts
         run: |

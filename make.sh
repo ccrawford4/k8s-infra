@@ -65,7 +65,10 @@ kube-config() {
   aws eks update-kubeconfig \
     --name $(terraform output -raw cluster_name) \
     --region $(terraform output -raw region)
+}
 
+# Install all apps + helm charts
+kube-install() {
   # Install ArgoCD
   cd "$PROJECT_DIR"
   kubectl create namespace argocd
