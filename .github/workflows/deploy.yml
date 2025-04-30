@@ -110,11 +110,26 @@ jobs:
           namespace: ${{ inputs.environment }}
           chart: ./charts/redis
           values: |
-            username: ${{ secrets.REDIS_USERNAME }}
             password: ${{ secrets.REDIS_PASSWORD }}
         env:
           KUBECONFIG: ./kubeconfig.yaml
-      # - name: Deploy web chart
+
+      - name: Deploy searchapi chart
+        if: contains(env.charts, 'searchapi')
+        uses: vimeda/helm@v1.7.0
+        with:
+          release: searchapi
+          namespace: ${{ inputs.environment }}
+          chart: ./charts/searchapi
+          values: |
+            containerPort: 8080
+            DSN: ${{ secrets.DSN }}
+            REDIS_HOST: "redis.${{ inputs.environment }}.svc.cluster.local:6379"
+            REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
+
+          # - name: Deploy web chart
       #   if: contains(env.charts, 'web')
       #   uses: bitovi/github-actions-deploy-eks-helm@v1.2.12
       #   with:

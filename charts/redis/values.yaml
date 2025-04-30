@@ -39,7 +39,6 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-username: ""
 password: ""
 
 resources: {}

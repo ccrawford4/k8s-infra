@@ -36,17 +36,6 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-            - name: "REDIS_USERNAME"
-              valueFrom:
-                secretKeyRef:
-                  key: REDIS_USERNAME
-                  name: {{ .Release.Name }}-auth
-            - name: "REDIS_PASSWORD"
-              valueFrom:
-                secretKeyRef:
-                  key: REDIS_PASSWORD 
-                  name: {{ .Release.Name }}-auth
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
