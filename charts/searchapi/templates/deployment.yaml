@@ -38,20 +38,11 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: "DSN"
-              valueFrom:
-                secretKeyRef:
-                  key: DSN
-                  name: {{ .Release.Name }}-auth
+              value: {{ .Values.DSN }}
             - name: "REDIS_HOST"
-              valueFrom:
-                secretKeyRef:
-                  key: REDIS_HOST
-                  name: {{ .Release.Name }}-auth
+              value: {{ .Values.REDIS_HOST }}
             - name: "REDIS_PASSWORD"
-              valueFrom:
-                secretKeyRef:
-                  key: REDIS_PASSWORD
-                  name: {{ .Release.Name }}-auth
+              value: {{ .Values.REDIS_PASSWORD }}
           ports:
             - name: http
               containerPort: {{ .Values.containerPort }}
