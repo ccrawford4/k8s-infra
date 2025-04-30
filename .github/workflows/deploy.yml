@@ -130,19 +130,25 @@ jobs:
         env:
           KUBECONFIG: ./kubeconfig.yaml
 
+      # - name: Deploy the Ingress controller
+      #   if: contains(env.charts, 'web') && contains(env.charts, 'web')
+      #   uses: vimeda/helm@v1.7.0
+      #   with:
+      #     release: ingress-nginx
+      #     namespace: ${{ inputs.environment }}
+      #     chart: app
+      #     repo: https://kubernetes.github.io/ingress-nginx
+      #     repo-alias: ingress-controller
+      #     values: |
+      #       app.version: 1.12.2
+      #   env:
+      #     KUBECONFIG: ./kubeconfig.yaml
+
       - name: Deploy the Ingress controller
-        if: contains(env.charts, 'web') && contains(env.charts, 'web')
-        uses: vimeda/helm@v1.7.0
-        with:
-          release: ingress-nginx
-          namespace: ${{ inputs.environment }}
-          chart: app
-          repo: https://kubernetes.github.io/ingress-nginx
-          repo-alias: ingress-controller
-          values: |
-            app.version: 1.12.2
-        env:
-          KUBECONFIG: ./kubeconfig.yaml
+        run: |
+          helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+          helm repo update
+          helm upgrade ingress-nginx ingress-nginx/ingress-nginx --install
 
       - name: Deploy the Ingress service
         run: kubectl -n ${{ inputs.environment }} apply -f k8s/ingress.yaml
