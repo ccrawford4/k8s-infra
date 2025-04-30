@@ -130,6 +130,62 @@ jobs:
         env:
           KUBECONFIG: ./kubeconfig.yaml
 
+      - name: Deploy the Ingress controller
+        if: contains(env.charts, 'web') && contains(env.charts, 'web')
+        uses: vimeda/helm@v1.7.0
+        with:
+          release: ingress-nginx
+          namespace: ${{ inputs.environment }}
+          chart: oci://ghcr.io/nginx/charts/nginx-ingress
+          version: 2.1.0
+
+      - name: Deploy the Ingress service
+        run: kubectl -n ${{ inputs.environment }} apply -f k8s/ingress.yaml
+
+      - name: Get the Ingress IP/hostname
+        id: get-ingress-host
+        run: |
+          echo "Getting ingress host information..."
+          # Wait for ingress to be ready and have an address
+          attempts=0
+          max_attempts=30
+          until [ $attempts -ge $max_attempts ]
+          do
+            INGRESS_HOST=$(kubectl -n ${{ inputs.environment }} get ingress -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}')
+            if [ -z "$INGRESS_HOST" ]; then
+              INGRESS_HOST=$(kubectl -n ${{ inputs.environment }} get ingress -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}')
+            fi
+            
+            if [ -n "$INGRESS_HOST" ]; then
+              break
+            fi
+            
+            attempts=$((attempts+1))
+            echo "Waiting for ingress to get external address... (Attempt: $attempts/$max_attempts)"
+            sleep 10
+          done
+
+          if [ -z "$INGRESS_HOST" ]; then
+            echo "::error::Failed to get ingress host after multiple attempts"
+            exit 1
+          fi
+
+          echo "INGRESS_HOST=$INGRESS_HOST" >> $GITHUB_ENV
+          echo "Found ingress host: $INGRESS_HOST"
+
+      - name: Deploy web chart
+        if: contains(env.charts, 'web')
+        uses: vimeda/helm@v1.7.0
+        with:
+          release: web
+          namespace: ${{ inputs.environment }}
+          chart: ./charts/web
+          values: |
+            API_ENDPOINT: ${{ env.INGRESS_HOST }}
+            NEXTAUTH_URL: ${{ env.INGRESS_HOST}}/api/auth
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
+
           # - name: Deploy web chart
       #   if: contains(env.charts, 'web')
       #   uses: bitovi/github-actions-deploy-eks-helm@v1.2.12
@@ -142,15 +198,3 @@ jobs:
       #     chart-path: ./charts/web
       #     name: web
       #     values: image.tag=latest
-      # - name: Deploy redis chart
-      #   if: contains(env.charts, 'redis')
-      #   uses: bitovi/github-actions-deploy-eks-helm@v1.2.12
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: us-west-2
-      #     cluster-name: mycluster
-      #     namespace: ${{ inputs.environment }}
-      #     chart-path: ./charts/redis
-      #     name: redis
-      #     values: redis.username=${{ secrets.REDIS_USERNAME }},redis.password=${{ secrets.REDIS_PASSWORD }},image.tag=latest
