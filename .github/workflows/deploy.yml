@@ -42,7 +42,6 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@master
         with:
-          # role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -54,9 +53,17 @@ jobs:
             --name ${{ secrets.AWS_EKS_CLUSTER_NAME }} \
             --kubeconfig ./kubeconfig.yaml
 
-      - name: Create namespace if not exists
+      - name: Create environment namespace if not exists
         run: |
           kubectl --kubeconfig=./kubeconfig.yaml get namespace ${{ inputs.environment }} || kubectl --kubeconfig=./kubeconfig.yaml create namespace ${{ inputs.environment }}
+
+      - name: Create argocd namespace if not exists
+        run: |
+          kubectl --kubeconfig=./kubeconfig.yaml get namespace argocd || kubectl --kubeconfig=./kubeconfig.yaml create namespace argocd
+
+      - name: Deploy ArgoCD
+        run: |
+          kubectl --kubeconfig=./kubeconfig.yaml apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
       - name: Set charts to deploy
         id: set-charts
@@ -79,22 +86,9 @@ jobs:
       #     chart-path: ./charts/searchapi
       #     name: searchapi
       #     values: containerPort=8080,DNS=${{ secrets.DSN }},REDIS_HOST=${{ secrets.REDIS_HOST }},REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
-      # - name: Deploy mysql chart
-      #   if: contains(env.charts, 'mysql')
-      #   uses: vimeda/helm@v1.7.0
-      #   with:
-      #     # aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     # aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     cluster-role-arn: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/${{ secrets.AWS_ROLE_TO_ASSUME }}
-      #     aws-region: ${{ secrets.AWS_REGION }}
-      #     cluster-name: ${{ secrets.AWS_EKS_CLUSTER_NAME }}
-      #     namespace: ${{ inputs.environment }}
-      #     chart-path: ./charts/mysql
-      #     config-files: ./charts/mysql/values.yaml
-      #     name: mysql
-      #     values: database=${{ secrets.MYSQL_DATABASE }},username=${{ secrets.MYSQL_USERNAME }},password=${{ secrets.MYSQL_PASSWORD }},root_password=${{ secrets.MYSQL_ROOT_PASSWORD }}
 
       - name: Deploy mysql chart
+        if: contains(env.charts, 'mysql')
         uses: vimeda/helm@v1.7.0
         with:
           release: mysql
@@ -108,6 +102,18 @@ jobs:
         env:
           KUBECONFIG: ./kubeconfig.yaml
 
+      - name: Deploy redis chart
+        if: contains(env.charts, 'redis')
+        uses: vimeda/helm@v1.7.0
+        with:
+          release: redis
+          namespace: ${{ inputs.environment }}
+          chart: ./charts/redis
+          values: |
+            username: ${{ secrets.REDIS_USERNAME }}
+            password: ${{ secrets.REDIS_PASSWORD }}
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
       # - name: Deploy web chart
       #   if: contains(env.charts, 'web')
       #   uses: bitovi/github-actions-deploy-eks-helm@v1.2.12
