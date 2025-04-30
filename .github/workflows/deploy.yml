@@ -145,6 +145,8 @@ jobs:
       #     KUBECONFIG: ./kubeconfig.yaml
 
       - name: Deploy the Ingress controller
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
         run: |
           helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
           helm repo update
