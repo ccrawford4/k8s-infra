@@ -75,19 +75,6 @@ jobs:
             echo "charts=searchapi web redis" >> $GITHUB_ENV
           fi
 
-      # - name: Deploy searchapi chart
-      #   if: contains(env.charts, 'searchapi')
-      #   uses: bitovi/github-actions-deploy-eks-helm@v1.2.12
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: us-west-2
-      #     cluster-name: mycluster
-      #     namespace: ${{ inputs.environment }}
-      #     chart-path: ./charts/searchapi
-      #     name: searchapi
-      #     values: containerPort=8080,DNS=${{ secrets.DSN }},REDIS_HOST=${{ secrets.REDIS_HOST }},REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
-
       - name: Deploy mysql chart
         if: contains(env.charts, 'mysql')
         uses: vimeda/helm@v1.7.0
@@ -130,27 +117,13 @@ jobs:
         env:
           KUBECONFIG: ./kubeconfig.yaml
 
-      # - name: Deploy the Ingress controller
-      #   if: contains(env.charts, 'web') && contains(env.charts, 'web')
-      #   uses: vimeda/helm@v1.7.0
-      #   with:
-      #     release: ingress-nginx
-      #     namespace: ${{ inputs.environment }}
-      #     chart: app
-      #     repo: https://kubernetes.github.io/ingress-nginx
-      #     repo-alias: ingress-controller
-      #     values: |
-      #       app.version: 1.12.2
-      #   env:
-      #     KUBECONFIG: ./kubeconfig.yaml
-
       - name: Deploy the Ingress controller
         env:
           KUBECONFIG: ./kubeconfig.yaml
         run: |
-          helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-          helm repo update
-          helm upgrade ingress-nginx ingress-nginx/ingress-nginx --install
+          helm -n repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+          helm -n repo update
+          helm -n upgrade ingress-nginx ingress-nginx/ingress-nginx --install
 
       - name: Deploy the Ingress service
         run: kubectl -n ${{ inputs.environment }} apply -f k8s/ingress.yaml
@@ -198,16 +171,3 @@ jobs:
             NEXTAUTH_URL: ${{ env.INGRESS_HOST}}/api/auth
         env:
           KUBECONFIG: ./kubeconfig.yaml
-
-          # - name: Deploy web chart
-      #   if: contains(env.charts, 'web')
-      #   uses: bitovi/github-actions-deploy-eks-helm@v1.2.12
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: us-west-2
-      #     cluster-name: mycluster
-      #     namespace: ${{ inputs.environment }}
-      #     chart-path: ./charts/web
-      #     name: web
-      #     values: image.tag=latest
