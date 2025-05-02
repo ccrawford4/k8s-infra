@@ -121,9 +121,9 @@ jobs:
         env:
           KUBECONFIG: ./kubeconfig.yaml
         run: |
-          helm -n repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-          helm -n repo update
-          helm -n upgrade ingress-nginx ingress-nginx/ingress-nginx --install
+          helm -n ${{ inputs.environment }} repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+          helm -n ${{ inputs.environment }} repo update
+          helm -n ${{ inputs.environment }} upgrade ingress-nginx ingress-nginx/ingress-nginx --install
 
       - name: Deploy the Ingress service
         run: kubectl -n ${{ inputs.environment }} apply -f k8s/ingress.yaml
