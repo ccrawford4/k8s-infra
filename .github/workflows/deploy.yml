@@ -55,16 +55,22 @@ jobs:
             --kubeconfig ./kubeconfig.yaml
 
       - name: Create environment namespace if not exists
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
         run: |
-          kubectl --kubeconfig=./kubeconfig.yaml get namespace ${{ inputs.environment }} || kubectl --kubeconfig=./kubeconfig.yaml create namespace ${{ inputs.environment }}
+          kubectl get namespace ${{ inputs.environment }} || kubectl create namespace ${{ inputs.environment }}
 
       - name: Create argocd namespace if not exists
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
         run: |
-          kubectl --kubeconfig=./kubeconfig.yaml get namespace argocd || kubectl --kubeconfig=./kubeconfig.yaml create namespace argocd
+          kubectl get namespace argocd || kubectl create namespace argocd
 
       - name: Deploy ArgoCD
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
         run: |
-          kubectl --kubeconfig=./kubeconfig.yaml apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+          kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
       - name: Set charts to deploy
         id: set-charts
@@ -126,9 +132,13 @@ jobs:
           helm -n ${{ inputs.environment }} upgrade ingress-nginx ingress-nginx/ingress-nginx --install
 
       - name: Deploy the Ingress service
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
         run: kubectl -n ${{ inputs.environment }} apply -f k8s/ingress.yaml
 
       - name: Get the Ingress IP/hostname
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
         id: get-ingress-host
         run: |
           echo "Getting ingress host information..."
