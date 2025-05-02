@@ -135,9 +135,15 @@ jobs:
         env:
           KUBECONFIG: ./kubeconfig.yaml
         run: |
-          helm -n ${{ inputs.environment }} repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-          helm -n ${{ inputs.environment }} repo update
-          helm -n ${{ inputs.environment }} upgrade ingress-nginx ingress-nginx/ingress-nginx --install
+          # Check if ingress-nginx is already deployed
+          if ! helm -n ${{ inputs.environment }} list | grep -q ingress-nginx; then
+            echo "Ingress controller not found. Installing now..."
+            helm -n ${{ inputs.environment }} repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+            helm -n ${{ inputs.environment }} repo update
+            helm -n ${{ inputs.environment }} upgrade ingress-nginx ingress-nginx/ingress-nginx --install
+          else
+            echo "Ingress controller already exists. Skipping installation."
+          fi
 
       - name: Deploy the Ingress service
         env:
