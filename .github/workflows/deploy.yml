@@ -185,7 +185,7 @@ jobs:
           namespace: ${{ inputs.environment }}
           chart: ./charts/web
           values: |
-            API_ENDPOINT: ${{ env.INGRESS_HOST }}
+            API_ENDPOINT: ${{ env.INGRESS_HOST }}/search
             NEXTAUTH_URL: ${{ env.INGRESS_HOST}}/api/auth
             GITHUB_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
             GITHUB_SECRET: ${{ secrets.GH_SECRET }}
