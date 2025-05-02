@@ -25,9 +25,9 @@ on:
         required: true
       MYSQL_ROOT_PASSWORD:
         required: true
-      GITHUB_CLIENT_ID:
+      GH_CLIENT_ID:
         required: true
-      GITHUB_SECRET:
+      GH_SECRET:
         required: true
       NEXTAUTH_SECRET:
         required: true
@@ -187,8 +187,8 @@ jobs:
           values: |
             API_ENDPOINT: ${{ env.INGRESS_HOST }}
             NEXTAUTH_URL: ${{ env.INGRESS_HOST}}/api/auth
-            GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
-            GITHUB_SECRET: ${{ secrets.GITHUB_SECRET }}
+            GITHUB_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
+            GITHUB_SECRET: ${{ secrets.GH_SECRET }}
             NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
             GOOGLE_ID: ${{ secrets.GOOGLE_ID }}
             GOOGLE_SECRET: ${{ secrets.GOOGLE_SECRET }}

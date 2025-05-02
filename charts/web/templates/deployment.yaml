@@ -41,10 +41,10 @@ spec:
               value: {{ .Values.API_ENDPOINT }}
             - name: "NEXTAUTH_URL"
               value: {{ .Values.NEXTAUTH_URL }}
-            - name: "GITHUB_CLIENT_ID"
-              value: {{ .Values.GITHUB_CLIENT_ID }}
-            - name: "GITHUB_SECRET"
-              value: {{ .Values.GITHUB_SECRET }}
+            - name: "GH_CLIENT_ID"
+              value: {{ .Values.GH_CLIENT_ID }}
+            - name: "GH_SECRET"
+              value: {{ .Values.GH_SECRET }}
             - name: "NEXTAUTH_SECRET"
               value: {{ .Values.NEXTAUTH_SECRET }}
             - name: "GOOGLE_ID"

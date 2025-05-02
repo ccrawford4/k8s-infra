@@ -23,8 +23,8 @@ jobs:
       MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
       MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
       MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-      GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
-      GITHUB_SECRET: ${{ secrets.GITHUB_SECRET }}
+      GH_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
+      GH_SECRET: ${{ secrets.GH_SECRET }}
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
       GOOGLE_ID: ${{ secrets.GOOGLE_ID }}
       GOOGLE_SECRET: ${{ secrets.GOOGLE_SECRET }}
