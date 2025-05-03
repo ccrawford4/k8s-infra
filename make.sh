@@ -176,9 +176,24 @@ k8s-1.2.0() {
 # delete eks content + terraform destroy + delete ecr repository
 destroy() {
   # delete eks content
-  kubectl delete deployments --all --namespace eks-blue-green
-  kubectl delete services --all --namespace eks-blue-green
-  kubectl delete namespace eks-blue-green
+  NAMESPACES=("qa" "uat" "prod" "ingress-nginx")
+
+  for NAMESPACE in "${NAMESPACES[@]}"; do
+    # Check if namespace exists
+    if kubectl get namespace "$NAMESPACE" &>/dev/null; then
+      echo "Cleaning up namespace: $NAMESPACE"
+
+      kubectl delete deployments --all --namespace "$NAMESPACE"
+      kubectl delete services --all --namespace "$NAMESPACE"
+      kubectl delete namespace "$NAMESPACE"
+
+      echo "Completed cleanup of namespace: $NAMESPACE"
+    else
+      echo "Namespace $NAMESPACE does not exist, skipping"
+    fi
+  done
+
+  echo "Cleanup process completed"
 
   # terraform destroy
   cd "$PROJECT_DIR/infra"
