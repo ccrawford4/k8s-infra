@@ -16,6 +16,10 @@ on:
         type: string
         description: The tag of the web image being promoted
         default: latest
+
+permissions:
+  id-token: write
+
 jobs:
   tag:
     name: Tag Images for Promotion
