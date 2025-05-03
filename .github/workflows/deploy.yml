@@ -135,7 +135,7 @@ jobs:
         if: contains(env.charts, 'searchapi')
         run: |
           # Wait for LoadBalancer to get external IP
-          until kubectl get svc searchapi -n ${{ inputs.environment }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}' | grep -q .; do
+          until kubectl get svc searchapi -n qa -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' | grep -q .; do
             echo "Waiting for searchapi LoadBalancer to get external IP..."
             sleep 10
           done
