@@ -134,22 +134,8 @@ jobs:
       - name: Extract searchapi LoadBalancer endpoint
         if: contains(env.charts, 'searchapi')
         run: |
-          # Wait for LoadBalancer to get external IP
-          until kubectl get svc searchapi -n qa -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' | grep -q .; do
-            echo "Waiting for searchapi LoadBalancer to get external IP..."
-            sleep 10
-          done
-
-          # Store the external IP/domain
-          SEARCHAPI_EXTERNAL_IP=$(kubectl get svc searchapi -n ${{ inputs.environment }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-
-          # If using hostname instead of IP (for AWS, Azure)
-          if [ -z "$SEARCHAPI_EXTERNAL_IP" ]; then
-            SEARCHAPI_EXTERNAL_IP=$(kubectl get svc searchapi -n ${{ inputs.environment }} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-          fi
-
-          echo "SEARCHAPI_LB_ENDPOINT=$SEARCHAPI_EXTERNAL_IP" >> $GITHUB_ENV
-          echo "Searchapi LoadBalancer endpoint: $SEARCHAPI_EXTERNAL_IP"
+          SEARCHAPI_LB_ENDPOINT=$(kubectl get svc searchapi -n ${{ inputs.environment }} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "SEARCHAPI_LB_ENDPOINT=$SEARCHAPI_LB_ENDPOINT" >> $GITHUB_ENV
         env:
           KUBECONFIG: ./kubeconfig.yaml
 
@@ -161,8 +147,7 @@ jobs:
           namespace: ${{ inputs.environment }}
           chart: ./charts/web
           values: |
-            API_ENDPOINT: http://<searchapi service load balancer>search
-            NEXTAUTH_URL: http://<web service load balancer>/api/auth
+            API_ENDPOINT: http://${{ env.SEARCHAPI_LB_ENDPOINT}}/search
             GITHUB_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
             GITHUB_SECRET: ${{ secrets.GH_SECRET }}
             NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
@@ -171,22 +156,28 @@ jobs:
         env:
           KUBECONFIG: ./kubeconfig.yaml
 
-      - name: Update web with LoadBalancer endpoint
+      - name: Extract web LoadBalancer endpoint
         if: contains(env.charts, 'web')
         run: |
-          # Get web LoadBalancer address
-          WEB_LB=$(get_lb_address "web" "${{ inputs.environment }}")
-          echo "WEB_LB_ENDPOINT=$WEB_LB" >> $GITHUB_ENV
-          echo "Web LoadBalancer endpoint: $WEB_LB"
+          WEB_LB_ENDPOINT=$(kubectl get svc web -n ${{ inputs.environment }} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+          echo "WEB_LB_ENDPOINT=$WEB_LB_ENDPOINT" >> $GITHUB_ENV
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
 
-          # Get current values from the release
-          helm get values web -n ${{ inputs.environment }} > web-values.yaml
-
-          # Update the web deployment with NEXTAUTH_URL
-          helm upgrade web ./charts/web \
-            --namespace ${{ inputs.environment }} \
-            -f web-values.yaml \
-            --set NEXTAUTH_URL=http://$WEB_LB/api/auth \
-            --reuse-values
+      - name: Deploy web chart
+        if: contains(env.charts, 'web')
+        uses: vimeda/helm@v1.7.0
+        with:
+          release: web
+          namespace: ${{ inputs.environment }}
+          chart: ./charts/web
+          values: |
+            API_ENDPOINT: http://${{ env.SEARCHAPI_LB_ENDPOINT}}/search
+            NEXTAUTH_URL: http://${{ env.WEB_LB_ENDPOINT}}/api/auth
+            GITHUB_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
+            GITHUB_SECRET: ${{ secrets.GH_SECRET }}
+            NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+            GOOGLE_ID: ${{ secrets.GOOGLE_ID }}
+            GOOGLE_SECRET: ${{ secrets.GOOGLE_SECRET }}
         env:
           KUBECONFIG: ./kubeconfig.yaml
