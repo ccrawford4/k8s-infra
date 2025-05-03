@@ -95,14 +95,9 @@ jobs:
         env:
           KUBECONFIG: ./kubeconfig.yaml
         run: |
-          if ! helm -n ingress-nginx list | grep -q ingress-nginx; then
-            echo "Ingress controller not found. Installing now..."
-            helm -n ingress-nginx repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-            helm -n ingress-nginx repo update
-            helm -n ingress-nginx upgrade ingress-nginx ingress-nginx/ingress-nginx --install
-          else
-            echo "Ingress controller already exists. Skipping installation."
-          fi
+          helm upgrade --install ingress-nginx ingress-nginx \
+          --repo https://kubernetes.github.io/ingress-nginx \
+          --namespace ingress-nginx --create-namespace
 
       - name: Deploy mysql chart
         if: contains(env.charts, 'mysql')
