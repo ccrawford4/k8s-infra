@@ -35,6 +35,8 @@ on:
         required: true
       GOOGLE_SECRET:
         required: true
+      REDIS_PASSWORD:
+        required: true
 
 permissions:
   id-token: write
@@ -89,6 +91,19 @@ jobs:
             echo "charts=searchapi web redis" >> $GITHUB_ENV
           fi
 
+      - name: Deploy the Ingress controller
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
+        run: |
+          if ! helm -n ingress-nginx list | grep -q ingress-nginx; then
+            echo "Ingress controller not found. Installing now..."
+            helm -n ingress-nginx repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+            helm -n ingress-nginx repo update
+            helm -n ingress-nginx upgrade ingress-nginx ingress-nginx/ingress-nginx --install
+          else
+            echo "Ingress controller already exists. Skipping installation."
+          fi
+
       - name: Deploy mysql chart
         if: contains(env.charts, 'mysql')
         uses: vimeda/helm@v1.7.0
@@ -131,15 +146,31 @@ jobs:
         env:
           KUBECONFIG: ./kubeconfig.yaml
 
-      - name: Extract searchapi LoadBalancer endpoint
-        if: contains(env.charts, 'searchapi')
-        run: |
-          SEARCHAPI_LB_ENDPOINT=$(kubectl get svc searchapi -n ${{ inputs.environment }} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-          echo "SEARCHAPI_LB_ENDPOINT=$SEARCHAPI_LB_ENDPOINT" >> $GITHUB_ENV
+      - name: Deploy web chart without values
+        if: contains(env.charts, 'web')
+        uses: vimeda/helm@v1.7.0
+        with:
+          release: web
+          namespace: ${{ inputs.environment }}
+          chart: ./charts/web
         env:
           KUBECONFIG: ./kubeconfig.yaml
 
-      - name: Deploy web chart
+      - name: Deploy the Ingress service
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
+        run: kubectl -n ${{ inputs.environment }} apply -f k8s/ingress.yaml
+
+      - name: Get the Ingress hostname
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
+        id: get-ingress-host
+        run: |
+          INGRESS_HOST=$(kubectl -n ${{ inputs.environment }} get ingress -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}')
+          echo "INGRESS_HOST=$INGRESS_HOST" >> $GITHUB_ENV
+          echo "Found ingress host: $INGRESS_HOST"
+
+      - name: Deploy web chart with ingress info
         if: contains(env.charts, 'web')
         uses: vimeda/helm@v1.7.0
         with:
@@ -147,33 +178,8 @@ jobs:
           namespace: ${{ inputs.environment }}
           chart: ./charts/web
           values: |
-            API_ENDPOINT: http://${{ env.SEARCHAPI_LB_ENDPOINT}}/search
-            GITHUB_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
-            GITHUB_SECRET: ${{ secrets.GH_SECRET }}
-            NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-            GOOGLE_ID: ${{ secrets.GOOGLE_ID }}
-            GOOGLE_SECRET: ${{ secrets.GOOGLE_SECRET }}
-        env:
-          KUBECONFIG: ./kubeconfig.yaml
-
-      - name: Extract web LoadBalancer endpoint
-        if: contains(env.charts, 'web')
-        run: |
-          WEB_LB_ENDPOINT=$(kubectl get svc web -n ${{ inputs.environment }} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-          echo "WEB_LB_ENDPOINT=$WEB_LB_ENDPOINT" >> $GITHUB_ENV
-        env:
-          KUBECONFIG: ./kubeconfig.yaml
-
-      - name: Deploy web chart
-        if: contains(env.charts, 'web')
-        uses: vimeda/helm@v1.7.0
-        with:
-          release: web
-          namespace: ${{ inputs.environment }}
-          chart: ./charts/web
-          values: |
-            API_ENDPOINT: http://${{ env.SEARCHAPI_LB_ENDPOINT}}/search
-            NEXTAUTH_URL: http://${{ env.WEB_LB_ENDPOINT}}/api/auth
+            API_ENDPOINT: ${{ env.INGRESS_HOST }}/search
+            NEXTAUTH_URL: ${{ env.INGRESS_HOST}}/api/auth
             GITHUB_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
             GITHUB_SECRET: ${{ secrets.GH_SECRET }}
             NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}

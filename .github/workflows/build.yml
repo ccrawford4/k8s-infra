@@ -28,3 +28,4 @@ jobs:
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
       GOOGLE_ID: ${{ secrets.GOOGLE_ID }}
       GOOGLE_SECRET: ${{ secrets.GOOGLE_SECRET }}
+      REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}

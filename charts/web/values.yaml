@@ -42,7 +42,8 @@ securityContext:
   # runAsUser: 1000
 
 service:
-  type: LoadBalancer
+  # TODO: Change
+  type: ClusterIP
   port: 80
 
 containerPort: 3000

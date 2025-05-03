@@ -3,9 +3,7 @@ kind: Ingress
 metadata:
   name: ingress
   annotations:
-    alb.ingress.kubernetes.io/load-balancer-name: ingress
-    alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/scheme: internet-facing
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx
   rules:
@@ -17,7 +15,7 @@ spec:
               service:
                 name: searchapi
                 port:
-                  number: 80
+                  number: 8080
           - path: /crawl
             pathType: Exact
             backend:
