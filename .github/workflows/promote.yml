@@ -3,7 +3,7 @@ on:
     inputs:
       environment:
         type: string
-        description: The enviornment you are promoting to
+        description: The environment you are promoting to
         options:
           - User Acceptance Testing (UAT)
           - Production
@@ -16,13 +16,12 @@ on:
         type: string
         description: The tag of the web image being promoted
         default: latest
-
 jobs:
   tag:
     name: Tag Images for Promotion
     runs-on: ubuntu-latest
     outputs:
-      environment: ${{ stepts.get-tags.outputs.environment }}
+      environment: ${{ steps.get-tags.outputs.environment }}
     steps:
       - name: Configure AWS credentials
         env:
@@ -31,17 +30,14 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
-
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-
       - name: Get Source and Target Tag for Images
         id: get-tags
         run: |
           SOURCE_ENV=""
           TARGET_ENV=""
-
           if [ "${{ inputs.environment }}" = "User Acceptance Testing (UAT)" ]; then
             SOURCE_ENV="qa"
             TARGET_ENV="uat"
@@ -49,22 +45,17 @@ jobs:
             SOURCE_ENV="uat"
             TARGET_ENV="prod"
           fi
-
           OLD_SEARCHAPI_TAG="${SOURCE_ENV}-${{ inputs.searchapi-tag }}"
           NEW_SEARCHAPI_TAG="${TARGET_ENV}-${{ inputs.searchapi-tag }}"
           OLD_WEB_TAG="${SOURCE_ENV}-${{ inputs.web-tag }}"
           NEW_WEB_TAG="${TARGET_ENV}-${{ inputs.web-tag }}"
-
           echo "OLD_SEARCHAPI_TAG=$OLD_SEARCHAPI_TAG" >> $GITHUB_ENV
           echo "NEW_SEARCHAPI_TAG=$NEW_SEARCHAPI_TAG" >> $GITHUB_ENV
           echo "OLD_WEB_TAG=$OLD_WEB_TAG" >> $GITHUB_ENV
           echo "NEW_WEB_TAG=$NEW_WEB_TAG" >> $GITHUB_ENV
-
-
-          # Set the output of the program
+          # Set the output of the step
           echo "environment=$TARGET_ENV" >> $GITHUB_OUTPUT
-
-      - name: Re-tag specified image as prod-l
+      - name: Re-tag and push images
         env:
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -72,20 +63,17 @@ jobs:
           echo "Pulling old images"
           docker pull $ECR_REGISTRY/searchapi:$OLD_SEARCHAPI_TAG
           docker pull $ECR_REGISTRY/web:$OLD_WEB_TAG
-
           echo "Re-tagging images"
           docker tag $ECR_REGISTRY/searchapi:$OLD_SEARCHAPI_TAG $ECR_REGISTRY/searchapi:$NEW_SEARCHAPI_TAG
-          docker tag $ECR_REGISTRY/web:$OLD_SEARCHAPI_TAG $ECR_REGISTRY/web:$NEW_WEB_TAG
-
+          docker tag $ECR_REGISTRY/web:$OLD_WEB_TAG $ECR_REGISTRY/web:$NEW_WEB_TAG
           echo "Pushing new tags"
           docker push $ECR_REGISTRY/searchapi:$NEW_SEARCHAPI_TAG
           docker push $ECR_REGISTRY/web:$NEW_WEB_TAG
-
   deploy:
     needs: tag
     uses: ./.github/workflows/deploy.yml
     with:
-      environment: qa
+      environment: ${{ needs.tag.outputs.environment }}
     secrets:
       AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
