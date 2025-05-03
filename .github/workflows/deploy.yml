@@ -166,7 +166,8 @@ jobs:
             INGRESS_HOST=$(kubectl -n ${{ inputs.environment }} get ingress -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}')
           done
 
-          echo "$INGRESS_HOST=$INGRESS_HOST" >> $GITHUB_ENV
+          echo "INGRESS_HOST=$INGRESS_HOST" >> $GITHUB_ENV
+          echo "Found ingress host: $INGRESS_HOST"
 
       - name: Deploy web chart with ingress info
         if: contains(env.charts, 'web')
