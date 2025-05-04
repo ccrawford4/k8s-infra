@@ -21,7 +21,6 @@ spec:
           ports:
             - containerPort: 8080
           env:
-            API_ENDPOINT: ${API_ENDPOINT}
             DSN: ${DSN}
             REDIS_HOST: ${REDIS_HOST}
             REDIS_PASSWORD: ${REDIS_HOST}
