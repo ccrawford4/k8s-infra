@@ -79,7 +79,7 @@ jobs:
     needs: [get-tags, tag]
     uses: ./.github/workflows/deploy.yml
     with:
-      environment: ${{ needs.tag.outputs.environment }}
+      environment: qa
       searchapi-tag: ${{ needs.get-tags.outputs.searchapi-tag }}
       web-tag: ${{ needs.get-tags.outputs.web-tag }}
     secrets:
