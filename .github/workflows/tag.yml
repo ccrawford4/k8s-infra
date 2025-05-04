@@ -73,6 +73,13 @@ jobs:
           NEW_SEARCHAPI_TAG="${TARGET_ENV}-${{ inputs.searchapi-tag }}"
           OLD_WEB_TAG="${SOURCE_ENV}-${{ inputs.web-tag }}"
           NEW_WEB_TAG="${TARGET_ENV}-${{ inputs.web-tag }}"
+
+          # If promoting to qa then it doesn't have a prefix
+          if [ "${{ inputs.target-environment }}" = "qa"]; then
+            OLD_SEARCHAPI_TAG="${{ inputs.searchapi-tag }}"
+            OLD_WEB_TAG="${{ inputs.web-tag }}"
+          fi
+            
           echo "OLD_SEARCHAPI_TAG=$OLD_SEARCHAPI_TAG" >> $GITHUB_ENV
           echo "NEW_SEARCHAPI_TAG=$NEW_SEARCHAPI_TAG" >> $GITHUB_ENV
           echo "OLD_WEB_TAG=$OLD_WEB_TAG" >> $GITHUB_ENV
