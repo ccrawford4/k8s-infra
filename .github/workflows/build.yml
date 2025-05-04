@@ -68,7 +68,7 @@ jobs:
     needs: [get-tags, smoke-test]
     uses: ./.github/workflows/tag.yml
     with:
-      target-environment: uat
+      target-environment: qa
       searchapi-tag: ${{ needs.get-tags.outputs.searchapi-tag }}
       web-tag: ${{ needs.get-tags.outputs.web-tag }}
     secrets:
