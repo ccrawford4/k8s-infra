@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: searchapi-rollout
+  namespace: 
+spec:
+  replicas: 3
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: searchapi
+  template:
+    metadata:
+      labels:
+        app: searchapi
+    spec:
+      containers:
+        - name: searchapi
+          image: /searchapi:
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            DSN: 
+            REDIS_HOST: 
+            REDIS_PASSWORD: 
+  strategy:
+    blueGreen:
+      activeService: searchapi
+      previewService: searchapi-preview
+      autoPromotionEnabled: false
+      previewReplicaCount: 3
+      scaleDownDelaySeconds: 300

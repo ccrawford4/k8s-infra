@@ -166,9 +166,7 @@ jobs:
 
       - name: Blue/Green Rollout SearchAPI service
         if: inputs.environment != 'qa'
-        run: |
-          envsubst < k8s/searchapi-rollout.yaml > k8s/searchapi-rollout-processed.yaml
-          kubectl -n $NAMESPACE apply -f k8s/searchapi-rollout-processed.yaml
+        run: kubectl -n $NAMESPACE apply -f k8s/searchapi-rollout.yaml
         env:
           NAMESPACE: ${{ inputs.environment }}
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
