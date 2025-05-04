@@ -56,3 +56,4 @@ jobs:
       REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
       ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
       DSN: ${{ secrets.DSN }}
+      HOSTNAME: ${{ secrets.HOSTNAME }}
