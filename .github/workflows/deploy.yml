@@ -81,26 +81,34 @@ jobs:
             --region ${{ secrets.AWS_REGION }} \
             --name ${{ secrets.AWS_EKS_CLUSTER_NAME }} \
             --kubeconfig ./kubeconfig.yaml
-      #
-      # - name: Create namespaces
-      #   env:
-      #     KUBECONFIG: ./kubeconfig.yaml
-      #   run: |
-      #     kubectl get namespace ${{ inputs.environment }} || kubectl create namespace ${{ inputs.environment }}
-      #     kubectl get namespace ingress-nginx || kubectl create namespace ingress-nginx
-      #     kubectl get namespace argocd || kubectl create namespace argocd
-      #
-      # - name: Install ArgoCD
-      #   env:
-      #     KUBECONFIG: ./kubeconfig.yaml
-      #   run: |
-      #     kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-      #
-      # - name: Install Argo Rollouts
-      #   env:
-      #     KUBECONFIG: ./kubeconfig.yaml
-      #   run: |
-      #     kubectl apply -n argocd -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+
+      - name: Create namespaces
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
+        run: |
+          kubectl get namespace ${{ inputs.environment }} || kubectl create namespace ${{ inputs.environment }}
+          kubectl get namespace ingress-nginx || kubectl create namespace ingress-nginx
+          kubectl get namespace argocd || kubectl create namespace argocd
+
+      - name: Install ArgoCD
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
+        run: |
+          kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+      - name: Install Argo Rollouts
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
+        run: |
+          kubectl apply -n argocd -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+
+      - name: Setup Argo rollouts config maps and permissions
+        run: |
+          kubectl apply -n argocd k8s/argo-rollouts-config.yaml
+          kubectl apply -n argocd k8s/rollouts-configmap-role.yaml
+          kubectl apply -n argocd k8s/rollouts-configmap-rolebinding.yaml
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
 
       - name: Set charts to deploy
         id: set-charts
@@ -110,59 +118,59 @@ jobs:
           else
             echo "charts=searchapi web redis" >> $GITHUB_ENV
           fi
-      #
-      # - name: Deploy Ingress Controller
-      #   env:
-      #     KUBECONFIG: ./kubeconfig.yaml
-      #   run: |
-      #     helm upgrade --install ingress-nginx ingress-nginx \
-      #       --repo https://kubernetes.github.io/ingress-nginx \
-      #       --namespace ingress-nginx
-      #
-      # - name: Deploy MySQL chart
-      #   if: contains(env.charts, 'mysql')
-      #   uses: vimeda/helm@v1.7.0
-      #   with:
-      #     release: mysql
-      #     namespace: ${{ inputs.environment }}
-      #     chart: ./charts/mysql
-      #     values: |
-      #       database: ${{ inputs.environment }}
-      #       username: ${{ secrets.MYSQL_USERNAME }}
-      #       password: ${{ secrets.MYSQL_PASSWORD }}
-      #       root_password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-      #   env:
-      #     KUBECONFIG: ./kubeconfig.yaml
-      #
-      # - name: Deploy Redis chart
-      #   if: contains(env.charts, 'redis')
-      #   uses: vimeda/helm@v1.7.0
-      #   with:
-      #     release: redis
-      #     namespace: ${{ inputs.environment }}
-      #     chart: ./charts/redis
-      #     values: |
-      #       password: ${{ secrets.REDIS_PASSWORD }}
-      #   env:
-      #     KUBECONFIG: ./kubeconfig.yaml
-      #
-      # - name: Re-Deploy SearchAPI chart
-      #   if: inputs.environment == 'qa'
-      #   uses: vimeda/helm@v1.7.0
-      #   with:
-      #     release: searchapi
-      #     namespace: ${{ inputs.environment }}
-      #     chart: ./charts/searchapi
-      #     values: |
-      #       containerPort: 8080
-      #       image:
-      #         repository: ${{ secrets.ECR_REGISTRY }}/searchapi
-      #         tag: ${{ inputs.environment }}-${{ inputs.searchapi-tag }}
-      #       DSN: ${{ secrets.DSN }}
-      #       REDIS_HOST: redis.${{ inputs.environment }}.svc.cluster.local:6379
-      #       REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-      #   env:
-      #     KUBECONFIG: ./kubeconfig.yaml
+
+      - name: Deploy Ingress Controller
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
+        run: |
+          helm upgrade --install ingress-nginx ingress-nginx \
+            --repo https://kubernetes.github.io/ingress-nginx \
+            --namespace ingress-nginx
+
+      - name: Deploy MySQL chart
+        if: contains(env.charts, 'mysql')
+        uses: vimeda/helm@v1.7.0
+        with:
+          release: mysql
+          namespace: ${{ inputs.environment }}
+          chart: ./charts/mysql
+          values: |
+            database: ${{ inputs.environment }}
+            username: ${{ secrets.MYSQL_USERNAME }}
+            password: ${{ secrets.MYSQL_PASSWORD }}
+            root_password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
+
+      - name: Deploy Redis chart
+        if: contains(env.charts, 'redis')
+        uses: vimeda/helm@v1.7.0
+        with:
+          release: redis
+          namespace: ${{ inputs.environment }}
+          chart: ./charts/redis
+          values: |
+            password: ${{ secrets.REDIS_PASSWORD }}
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
+
+      - name: Re-Deploy SearchAPI chart
+        if: inputs.environment == 'qa'
+        uses: vimeda/helm@v1.7.0
+        with:
+          release: searchapi
+          namespace: ${{ inputs.environment }}
+          chart: ./charts/searchapi
+          values: |
+            containerPort: 8080
+            image:
+              repository: ${{ secrets.ECR_REGISTRY }}/searchapi
+              tag: ${{ inputs.environment }}-${{ inputs.searchapi-tag }}
+            DSN: ${{ secrets.DSN }}
+            REDIS_HOST: redis.${{ inputs.environment }}.svc.cluster.local:6379
+            REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
 
       - name: Blue/Green Rollout SearchAPI service
         if: inputs.environment != 'qa'
