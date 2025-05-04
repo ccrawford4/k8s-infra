@@ -154,6 +154,7 @@ jobs:
           docker pull "$ECR_REPOSITORY:$IMAGE_TAG"
           echo "pulled"
           helm -n $NAMESPACE upgrade --install searchapi . \
+                --kubeconfig ./kubeconfig.yaml \
                --set image.repository=$ECR_REPOSITORY \
                --set image.tag=$IMAGE_TAG \
                --set DSN=$DSN \
