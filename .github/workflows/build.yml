@@ -99,3 +99,4 @@ jobs:
       GOOGLE_SECRET: ${{ secrets.GOOGLE_SECRET }}
       REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
       ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+      DSN: ${{ secrets.DSN }}
