@@ -6,6 +6,12 @@ on:
       environment:
         type: string
         required: true
+      searchapi-tag:
+        type: string
+        required: true
+      web-tag:
+        type: string
+        required: true
     secrets:
       AWS_ACCOUNT:
         required: true
@@ -36,6 +42,8 @@ on:
       GOOGLE_SECRET:
         required: true
       REDIS_PASSWORD:
+        required: true
+      ECR_REGISTRY:
         required: true
 
 permissions:
@@ -138,6 +146,8 @@ jobs:
             DSN: "root:${{ secrets.MYSQL_ROOT_PASSWORD }}@tcp(mysql.${{ inputs.environment }}.svc.cluster.local:3306)/${{ secrets.MYSQL_DATABASE }}?charset=utf8mb4&parseTime=true&loc=Local"
             REDIS_HOST: "redis.${{ inputs.environment }}.svc.cluster.local:6379"
             REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+            image.repository: ${{ secrets.ECR_REGISTRY }}/searchapi
+            image.tag: ${{ inputs.environment }}-${{ inputs.web-tag }}
         env:
           KUBECONFIG: ./kubeconfig.yaml
 
@@ -184,5 +194,7 @@ jobs:
             NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
             GOOGLE_ID: ${{ secrets.GOOGLE_ID }}
             GOOGLE_SECRET: ${{ secrets.GOOGLE_SECRET }}
+            image.repository: ${{ secrets.ECR_REGISTRY }}/web
+            image.tag: ${{ inputs.environment }}-${{ inputs.web-tag }}
         env:
           KUBECONFIG: ./kubeconfig.yaml

@@ -5,9 +5,9 @@
 replicaCount: 3
 
 image:
-  repository: 975050071740.dkr.ecr.us-east-1.amazonaws.com/searchapi
+  repository: ""
   pullPolicy: IfNotPresent
-  tag: "1.9.0"
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""
@@ -41,7 +41,6 @@ securityContext:
   # runAsUser: 1000
 
 service:
-  # TODO: Change
   type: ClusterIP
   port: 8080
 

@@ -5,10 +5,10 @@
 replicaCount: 3
 
 image:
-  repository: 975050071740.dkr.ecr.us-east-1.amazonaws.com/web
+  repository: ""
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "1.2.0"
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""
@@ -42,7 +42,6 @@ securityContext:
   # runAsUser: 1000
 
 service:
-  # TODO: Change
   type: ClusterIP
   port: 80
 
