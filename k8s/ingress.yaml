@@ -2,9 +2,77 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress
+  namespace: qa
 spec:
-  ingressClassName: nginx
+  ingressClassName: nginx-qa
   rules:
+    - host: qa.calum.run
+    - http:
+        paths:
+          - path: /search
+            pathType: Exact
+            backend:
+              service:
+                name: searchapi
+                port:
+                  number: 8080
+          - path: /crawl
+            pathType: Exact
+            backend:
+              service:
+                name: searchapi
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port:
+                  number: 80
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+spec:
+  ingressClassName: nginx-uat
+  rules:
+    - host: uat.calum.run
+    - http:
+        paths:
+          - path: /search
+            pathType: Exact
+            backend:
+              service:
+                name: searchapi
+                port:
+                  number: 8080
+          - path: /crawl
+            pathType: Exact
+            backend:
+              service:
+                name: searchapi
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port:
+                  number: 80
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+spec:
+  ingressClassName: nginx-prod
+  rules:
+    - host: calum.run
     - http:
         paths:
           - path: /search
