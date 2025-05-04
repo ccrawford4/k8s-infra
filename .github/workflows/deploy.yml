@@ -146,8 +146,8 @@ jobs:
             DSN: "root:${{ secrets.MYSQL_ROOT_PASSWORD }}@tcp(mysql.${{ inputs.environment }}.svc.cluster.local:3306)/${{ secrets.MYSQL_DATABASE }}?charset=utf8mb4&parseTime=true&loc=Local"
             REDIS_HOST: "redis.${{ inputs.environment }}.svc.cluster.local:6379"
             REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-            image.repository: ${{ secrets.ECR_REGISTRY }}/searchapi
-            image.tag: ${{ inputs.environment }}-${{ inputs.web-tag }}
+            image.repository: "${{ secrets.ECR_REGISTRY }}/searchapi"
+            image.tag: "${{ inputs.environment }}-${{ inputs.searchapi-tag }}"
         env:
           KUBECONFIG: ./kubeconfig.yaml
 
@@ -194,7 +194,7 @@ jobs:
             NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
             GOOGLE_ID: ${{ secrets.GOOGLE_ID }}
             GOOGLE_SECRET: ${{ secrets.GOOGLE_SECRET }}
-            image.repository: ${{ secrets.ECR_REGISTRY }}/web
-            image.tag: ${{ inputs.environment }}-${{ inputs.web-tag }}
+            image.repository: "${{ secrets.ECR_REGISTRY }}/web"
+            image.tag: "${{ inputs.environment }}-${{ inputs.web-tag }}"
         env:
           KUBECONFIG: ./kubeconfig.yaml
