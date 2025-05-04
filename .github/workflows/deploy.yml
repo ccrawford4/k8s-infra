@@ -50,6 +50,8 @@ on:
         required: true
       DSN:
         required: true
+      HOSTNAME:
+        required: true
 
 permissions:
   id-token: write
@@ -161,34 +163,6 @@ jobs:
           KUBECONFIG: ./kubeconfig.yaml
         run: kubectl apply -f k8s/ingress.yaml
 
-      - name: Get Ingress hostname
-        env:
-          KUBECONFIG: ./kubeconfig.yaml
-        id: get-ingress-host
-        run: |
-          INGRESS_HOST=""
-          ATTEMPTS=0
-          MAX_ATTEMPTS=30
-
-          echo "Waiting for Ingress hostname..."
-          while [ -z "$INGRESS_HOST" ] && [ $ATTEMPTS -lt $MAX_ATTEMPTS ]; do
-            INGRESS_HOST=$(kubectl -n ingress-nginx get ingress -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}')
-            if [ -z "$INGRESS_HOST" ]; then
-              echo "Attempt $ATTEMPTS: Ingress hostname not ready, waiting 10 seconds..."
-              sleep 10
-              ATTEMPTS=$((ATTEMPTS+1))
-            else
-              echo "Ingress hostname found: $INGRESS_HOST"
-            fi
-          done
-
-          if [ -z "$INGRESS_HOST" ]; then
-            echo "Failed to get Ingress hostname after $MAX_ATTEMPTS attempts"
-            exit 1
-          fi
-
-          echo "INGRESS_HOST=$INGRESS_HOST" >> $GITHUB_ENV
-
       - name: Deploy Web chart
         if: contains(env.charts, 'web')
         uses: vimeda/helm@v1.7.0
@@ -200,8 +174,8 @@ jobs:
             image:
               repository: ${{ secrets.ECR_REGISTRY }}/web
               tag: ${{ inputs.environment }}-${{ inputs.web-tag }}
-            API_ENDPOINT: http://${{ env.INGRESS_HOST }}/search
-            NEXTAUTH_URL: http://${{ env.INGRESS_HOST }}/api/auth
+            API_ENDPOINT: http://${{ secrets.HOSTNAME }}/search
+            NEXTAUTH_URL: http://${{ secrets.HOSTNAME }}/api/auth
             GITHUB_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
             GITHUB_SECRET: ${{ secrets.GH_SECRET }}
             NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
