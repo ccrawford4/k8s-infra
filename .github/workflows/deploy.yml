@@ -68,15 +68,6 @@ jobs:
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Pull the images from ecr
-        env:
-          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-          SEARCHAPI_TAG: ${{ inputs.searchapi-tag }}
-          WEB_TAG: ${{ inputs.web-tag }}
-        run: |
-          docker pull "$ECR_REGISTRY/searchapi:$SEARCHAPI_TAG"
-          docker pull "$ECR_REGISTRY/web:$WEB_TAG"
-
       - name: Update kubeconfig
         run: |
           aws eks update-kubeconfig \
@@ -147,21 +138,40 @@ jobs:
           KUBECONFIG: ./kubeconfig.yaml
 
       - name: Deploy searchapi chart
-        if: contains(env.charts, 'searchapi')
-        uses: vimeda/helm@v1.7.0
-        with:
-          release: searchapi
-          namespace: ${{ inputs.environment }}
-          chart: ./charts/searchapi
-          values: |
-            containerPort: 8080
-            DSN: "root:${{ secrets.MYSQL_ROOT_PASSWORD }}@tcp(mysql.${{ inputs.environment }}.svc.cluster.local:3306)/${{ secrets.MYSQL_DATABASE }}?charset=utf8mb4&parseTime=true&loc=Local"
-            REDIS_HOST: "redis.${{ inputs.environment }}.svc.cluster.local:6379"
-            REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-            image.repository: "${{ secrets.ECR_REGISTRY }}/searchapi"
-            image.tag: "${{ inputs.environment }}-${{ inputs.searchapi-tag }}"
         env:
+          DSN: ${{ secrets.DSN }}
+          REDIS_HOST: "redis.${{ inputs.environment }}.svc.cluster.local:6379"
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          ECR_REPOSITORY: "${{ secrets.ECR_REGISTRY }}/searchapi"
+          IMAGE_TAG: "${{ inputs.environment }}-${{ inputs.searchapi-tag }}"
+          NAMESPACE: ${{ inputs.environment }}
           KUBECONFIG: ./kubeconfig.yaml
+        run: |
+          cd charts/searchapi
+          docker pull "$ECR_REGISTRY/searchapi:$IMAGE_TAG"
+          helm -n $NAMESPACE upgrade --install searchapi \
+               --set image.repository=$ECR_REPOSITORY \
+               --set image.tag=$IMAGE_TAG \
+               --set DSN=$DSN \
+               --set REDIS_HOST=$REDIS_HOST \
+               --set REDIS_PASSWORD=$REDIS_PASSWORD
+
+      # - name: Deploy searchapi chart
+      #   if: contains(env.charts, 'searchapi')
+      #   uses: vimeda/helm@v1.7.0
+      #   with:
+      #     release: searchapi
+      #     namespace: ${{ inputs.environment }}
+      #     chart: ./charts/searchapi
+      #     values: |
+      #       containerPort: 8080
+      #       DSN: "root:${{ secrets.MYSQL_ROOT_PASSWORD }}@tcp(mysql.${{ inputs.environment }}.svc.cluster.local:3306)/${{ secrets.MYSQL_DATABASE }}?charset=utf8mb4&parseTime=true&loc=Local"
+      #       REDIS_HOST: "redis.${{ inputs.environment }}.svc.cluster.local:6379"
+      #       REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+      #       image.repository: "${{ secrets.ECR_REGISTRY }}/searchapi"
+      #       image.tag: "${{ inputs.environment }}-${{ inputs.searchapi-tag }}"
+      # env:
+      #   KUBECONFIG: ./kubeconfig.yaml
 
       - name: Deploy web chart without values
         if: contains(env.charts, 'web')
