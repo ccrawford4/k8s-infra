@@ -1,21 +1,37 @@
 on:
   workflow_dispatch:
     inputs:
-      environment:
+      target-environment:
         type: string
         description: The environment you are promoting to
         options:
-          - User Acceptance Testing (UAT)
-          - Production
-        default: User Acceptance Testing (UAT)
+          - qa
+          - uat
+          - prod
       searchapi-tag:
         type: string
         description: The tag of the searchapi image being promoted
-        default: latest
       web-tag:
         type: string
         description: The tag of the web image being promoted
-        default: latest
+  workflow_call:
+    inputs:
+      target-environment:
+        type: string
+        description: The environment you are promoting to
+      searchapi-tag:
+        type: string
+        description: The tag of the searchapi image being promoted
+      web-tag:
+        type: string
+        description: The tag of the web image being promoted
+    secrets:
+      AWS_ACCOUNT:
+        required: true
+      AWS_ROLE_TO_ASSUME:
+        required: true
+      AWS_REGION:
+        required: true
 
 permissions:
   id-token: write
@@ -43,7 +59,7 @@ jobs:
         run: |
           SOURCE_ENV=""
           TARGET_ENV=""
-          if [ "${{ inputs.environment }}" = "User Acceptance Testing (UAT)" ]; then
+          if [ "${{ inputs.environment }}" = "uat" ]; then
             SOURCE_ENV="qa"
             TARGET_ENV="uat"
           else
