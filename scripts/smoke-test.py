@@ -50,7 +50,7 @@ def launch_ec2_instance():
     response = ec2.run_instances(
         LaunchTemplate={
             'LaunchTemplateId': LAUNCH_TEMPLATE_ID,
-            'Version': '3'
+            'Version': '1'
         },
         MinCount=1,
         MaxCount=1
