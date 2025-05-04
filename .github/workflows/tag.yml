@@ -62,19 +62,13 @@ jobs:
           if [ "${{ inputs.target-environment }}" = "qa" ]; then
             SOURCE_ENV=""
             TARGET_ENV="qa"
-            echo "test3"
-          elif [ "${{ inputs.target-environment }}" = "uat"]; then
+          elif [ "${{ inputs.target-environment }}" = "uat" ]; then
             SOURCE_ENV="qa"
             TARGET_ENV="uat"
-            echo "test1"
           else
             SOURCE_ENV="uat"
             TARGET_ENV="prod"
-            echo "test2"
           fi
-          echo "SOURCE_ENV: $SOURCE_ENV"
-          echo "TARGET_ENV: $TARGET_ENV"
-
           OLD_SEARCHAPI_TAG="${SOURCE_ENV}-${{ inputs.searchapi-tag }}"
           NEW_SEARCHAPI_TAG="${TARGET_ENV}-${{ inputs.searchapi-tag }}"
           OLD_WEB_TAG="${SOURCE_ENV}-${{ inputs.web-tag }}"
