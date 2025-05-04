@@ -148,13 +148,18 @@ jobs:
           KUBECONFIG: ./kubeconfig.yaml
         run: |
           cd charts/searchapi
+          echo "in searchapi"
+          echo "IMAGE_TAG: $IMAGE_TAG"
           docker pull "$ECR_REGISTRY/searchapi:$IMAGE_TAG"
+          echo "pulled"
           helm -n $NAMESPACE upgrade --install searchapi \
                --set image.repository=$ECR_REPOSITORY \
                --set image.tag=$IMAGE_TAG \
                --set DSN=$DSN \
                --set REDIS_HOST=$REDIS_HOST \
                --set REDIS_PASSWORD=$REDIS_PASSWORD
+
+          echo "helm install"
 
       # - name: Deploy searchapi chart
       #   if: contains(env.charts, 'searchapi')
