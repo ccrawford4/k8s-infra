@@ -23,16 +23,16 @@ jobs:
           fetch-tags: true
       - name: Get latest searchapi tag
         id: get-searchapi-tag
-        run: echo "tag=$(git tag --list --sort=v:refname | head -n 1)" >> $GITHUB_OUTPUT
+        run: echo "tag=$(git tag --list --sort=v:refname | head -n 1 | sed 's/^.//')" >> $GITHUB_OUTPUT
       - name: Checkout Web Repository
         uses: actions/checkout@v4
         with:
           repository: ccrawford4/search-app
           fetch-tags: true
-          run: echo "tag=$(git tag --list --sort=v:refname | head -n 1)" >> $GITHUB_OUTPUT
+          run: echo "tag=$(git tag --list --sort=v:refname | head -n 1 | sed 's/^.//')" >> $GITHUB_OUTPUT
       - name: Get latest web tag
         id: get-web-tag
-        run: echo "tag=$(git tag --list --sort=v:refname | head -n 1)" >> $GITHUB_OUTPUT
+        run: echo "tag=$(git tag --list --sort=v:refname | head -n 1 | sed 's/^.//')" >> $GITHUB_OUTPUT
   smoke-test:
     needs: get-tags
     name: Smoke Test
