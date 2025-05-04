@@ -119,7 +119,7 @@ jobs:
           namespace: ${{ inputs.environment }}
           chart: ./charts/mysql
           values: |
-            database: ${{ secrets.MYSQL_DATABASE }}
+            database: ${{ inputs.environment }}
             username: ${{ secrets.MYSQL_USERNAME }}
             password: ${{ secrets.MYSQL_PASSWORD }}
             root_password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
