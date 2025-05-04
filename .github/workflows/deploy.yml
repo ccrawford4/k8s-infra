@@ -162,6 +162,7 @@ jobs:
 
           helm -n $NAMESPACE upgrade --install searchapi . \
                 --kubeconfig ./kubeconfig.yaml \
+                --set containerPort=8080 \
                --set image.repository=$ECR_REPOSITORY \
                --set image.tag=$IMAGE_TAG \
                --set DSN=$DSN \
