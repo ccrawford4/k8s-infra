@@ -23,7 +23,7 @@ spec:
           env:
             DSN: ${DSN}
             REDIS_HOST: ${REDIS_HOST}
-            REDIS_PASSWORD: ${REDIS_HOST}
+            REDIS_PASSWORD: ${REDIS_PASSWORD}
   strategy:
     blueGreen:
       activeService: searchapi
@@ -31,3 +31,10 @@ spec:
       autoPromotionEnabled: false
       previewReplicaCount: 3
       scaleDownDelaySeconds: 300
+env:
+  - name: DSN
+    value: ${DSN}
+  - name: REDIS_HOST
+    value: ${REDIS_HOST}
+  - name: REDIS_PASSWORD
+    value: ${REDIS_PASSWORD}
