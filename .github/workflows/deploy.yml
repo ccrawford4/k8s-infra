@@ -140,8 +140,8 @@ jobs:
         env:
           KUBECONFIG: ./kubeconfig.yaml
 
-      - name: Deploy SearchAPI chart
-        if: contains(env.charts, 'searchapi')
+      - name: Re-Deploy SearchAPI chart
+        if: ${{ inputs.environment }} == "qa"
         uses: vimeda/helm@v1.7.0
         with:
           release: searchapi
@@ -156,6 +156,18 @@ jobs:
             REDIS_HOST: redis.${{ inputs.environment }}.svc.cluster.local:6379
             REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
         env:
+          KUBECONFIG: ./kubeconfig.yaml
+
+      - name: Blue/Green Rollout SearchAPI service
+        if: ${{ inputs.environment }} != "qa"
+        run: kubectl -n ${{ inputs.environment }} apply -f k8s/searchapi-rollout.yaml
+        env:
+          NAMESPACE: ${{ inputs.environment }}
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          IMAGE_TAG: ${{ inputs.searchapi-tag }}
+          DSN: ${{ secrets.DSN }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
           KUBECONFIG: ./kubeconfig.yaml
 
       - name: Deploy Ingress service
