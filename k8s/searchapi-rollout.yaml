@@ -21,9 +21,12 @@ spec:
           ports:
             - containerPort: 8080
           env:
-            DSN: ${DSN}
-            REDIS_HOST: ${REDIS_HOST}
-            REDIS_PASSWORD: ${REDIS_PASSWORD}
+            - name: DSN
+              value: ${DSN}
+            - name: REDIS_HOST
+              value: ${REDIS_HOST}
+            - name: REDIS_PASSWORD
+              value: ${REDIS_PASSWORD}
   strategy:
     blueGreen:
       activeService: searchapi
