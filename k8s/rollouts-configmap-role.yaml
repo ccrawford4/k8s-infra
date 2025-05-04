@@ -1,0 +1,10 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: rollouts-configmap-reader
+  namespace: argocd
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["argo-rollouts-config"]
+    verbs: ["get", "watch", "list"]
