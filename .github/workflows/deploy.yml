@@ -68,6 +68,15 @@ jobs:
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Pull the images from ecr
+        env:
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          SEARCHAPI_TAG: ${{ inputs.searchapi-tag }}
+          WEB_TAG: ${{ inputs.web-tag }}
+        run: |
+          docker pull "$ECR_REGISTRY/searchapi:$SEARCHAPI_TAG"
+          docker pull "$ECR_REGISTRY/web:$WEB_TAG"
+
       - name: Update kubeconfig
         run: |
           aws eks update-kubeconfig \
