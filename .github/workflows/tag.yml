@@ -86,6 +86,9 @@ jobs:
           echo "NEW_WEB_TAG=$NEW_WEB_TAG" >> $GITHUB_ENV
           # Set the output of the step
           echo "environment=$TARGET_ENV" >> $GITHUB_OUTPUT
+
+          echo "OLD_SEARCHAPI_TAG: $OLD_SEARCHAPI_TAG"
+          echo "NEW_SEARCHAPI_TAG: $NEW_SEARCHAPI_TAG"
       - name: Re-tag and push images
         env:
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
