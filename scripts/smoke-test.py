@@ -20,6 +20,7 @@ WEB_IMAGE_URI = os.environ.get('WEB_IMAGE_URI')
 SSH_TIMEOUT = 300  # 5 minutes
 HEALTH_CHECK_TIMEOUT = 300  # 5 minutes
 HEALTH_CHECK_INTERVAL = 10  # 10 seconds
+HEALTH_CHECK_URL = "http://localhost:3000"
 
 def create_ssh_key_file():
     """Create a temporary SSH key file from the environment variable."""
@@ -237,7 +238,7 @@ def main():
         run_docker_compose(public_ip, key_file)
         
         # Run health checks
-        if not run_health_check(public_ip, key_file, http://localhost:3000):
+        if not run_health_check(public_ip, key_file, HEALTH_CHECK_URL):
             raise Exception("Frontend Health check failed")
        
         print("Deployment and tests completed successfully!")
