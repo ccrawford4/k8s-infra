@@ -9,6 +9,61 @@ permissions:
   contents: read
 
 jobs:
+  get-tags:
+    name: Get most recent tags from source repos
+    runs-on: ubuntu-latest'
+    outputs:
+      searchapi-tag: ${{ steps.get-searchapi-tag.outputs.tag }}
+      web-tag: ${{steps.get-web-tag.outputs.tag }}
+    steps:
+      - name: Checkout Searchapi Repository
+        uses: actions/checkout@v4
+        with:
+          repository: ccrawford4/search
+          fetch-tags: true
+      - name: Get latest searchapi tag
+        id: get-searchapi-tag
+        run: echo "tag=$(git tag --list --sort=v:refname | head -n 1)" >> $GITHUB_OUTPUT
+      - name: Checkout Web Repository
+        uses: actions/checkout@v4
+        with:
+          repository: ccrawford4/search-app
+          fetch-tags: true
+          run: echo "tag=$(git tag --list --sort=v:refname | head -n 1)" >> $GITHUB_OUTPUT
+      - name: Get latest web tag
+        id: get-web-tag
+        run: echo "tag=$(git tag --list --sort=v:refname | head -n 1)" >> $GITHUB_OUTPUT
+  smoke_test:
+    needs: get-tags
+    name: Smoke Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Infra Repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install boto3 paramiko requests
+
+      - name: Launch EC2 instance and run tests
+        id: ec2-deploy
+        run: |
+          python scripts/smoke-test.py
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          EC2_SSH_KEY: ${{ secrets.EC2_PEM }}
+          LAUNCH_TEMPLATE_ID: ${{ secrets.LAUNCH_TEMPLATE_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          SEARCH_API_IMAGE_URI: "${{ secrets.ECR_REGISTRY}}/searchapi:${{ needs.get-tags.outputs.searchapi-tag }}"
+          WEB_TAG: "${{ secrets.ECR_REGISTRY}}/web:${{ needs.get-tags.outputs.web-tag }}"
   deploy:
     uses: ./.github/workflows/deploy.yml
     with:
