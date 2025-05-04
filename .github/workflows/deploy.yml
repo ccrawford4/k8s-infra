@@ -137,54 +137,7 @@ jobs:
         env:
           KUBECONFIG: ./kubeconfig.yaml
 
-      # - name: Deploy searchapi chart
-      #   env:
-      #     DSN: ${{ secrets.DSN }}
-      #     REDIS_HOST: "redis.${{ inputs.environment }}.svc.cluster.local:6379"
-      #     REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-      #     ECR_REPOSITORY: "${{ secrets.ECR_REGISTRY }}/searchapi"
-      #     IMAGE_TAG: "${{ inputs.environment }}-${{ inputs.searchapi-tag }}"
-      #     NAMESPACE: ${{ inputs.environment }}
-      #     KUBECONFIG: ./kubeconfig.yaml
-      #   run: |
-      #     cd charts/searchapi
-      #     echo "in searchapi"
-      #     echo "IMAGE_TAG: $IMAGE_TAG"
-      #     echo "repo being pulled: $ECR_REPOSITORY:$IMAGE_TAG"
-      #     docker pull "$ECR_REPOSITORY:$IMAGE_TAG"
-      #     echo "pulled"
-      #     helm -n $NAMESPACE upgrade --install searchapi . \
-      #          --set image.repository=$ECR_REPOSITORY \
-      #          --set image.tag=$IMAGE_TAG \
-      #          --set DSN=$DSN \
-      #          --set REDIS_HOST=$REDIS_HOST \
-      #          --set REDIS_PASSWORD=$REDIS_PASSWORD
-
-      #    echo "helm install"
-
-      - name: Pull Docker Image
-        run: |
-          echo "b4 docker pull"
-          docker pull "$ECR_REPOSITORY:$IMAGE_TAG"
-          echo "after docker pull"
-        env:
-          ECR_REPOSITORY: "${{ secrets.ECR_REGISTRY }}/searchapi"
-          IMAGE_TAG: "${{ inputs.environment }}-${{ inputs.searchapi-tag }}"
-
       - name: Deploy searchapi chart
-        if: contains(env.charts, 'searchapi')
-        uses: vimeda/helm@v1.7.0
-        with:
-          release: searchapi
-          namespace: ${{ inputs.environment }}
-          chart: ./charts/searchapi
-          values: |
-            containerPort: 8080
-            DSN: ${{ env.DSN }} 
-            REDIS_HOST: ${{ env.REDIS_HOST }}
-            REDIS_PASSWORD: ${{ env.REDIS_PASSWORD }}
-            image.repository: ${{ env.ECR_REPOSITORY }}
-            image.tag: ${{ env.IMAGE_TAG }}
         env:
           DSN: ${{ secrets.DSN }}
           REDIS_HOST: "redis.${{ inputs.environment }}.svc.cluster.local:6379"
@@ -193,6 +146,53 @@ jobs:
           IMAGE_TAG: "${{ inputs.environment }}-${{ inputs.searchapi-tag }}"
           NAMESPACE: ${{ inputs.environment }}
           KUBECONFIG: ./kubeconfig.yaml
+        run: |
+          cd charts/searchapi
+          echo "in searchapi"
+          echo "IMAGE_TAG: $IMAGE_TAG"
+          echo "repo being pulled: $ECR_REPOSITORY:$IMAGE_TAG"
+          docker pull "$ECR_REPOSITORY:$IMAGE_TAG"
+          echo "pulled"
+          helm -n $NAMESPACE upgrade --install searchapi . \
+               --set image.repository=$ECR_REPOSITORY \
+               --set image.tag=$IMAGE_TAG \
+               --set DSN=$DSN \
+               --set REDIS_HOST=$REDIS_HOST \
+               --set REDIS_PASSWORD=$REDIS_PASSWORD
+
+          echo "helm install"
+
+      # - name: Pull Docker Image
+      #   run: |
+      #     echo "b4 docker pull"
+      #     docker pull "$ECR_REPOSITORY:$IMAGE_TAG"
+      #     echo "after docker pull"
+      #   env:
+      #     ECR_REPOSITORY: "${{ secrets.ECR_REGISTRY }}/searchapi"
+      #     IMAGE_TAG: "${{ inputs.environment }}-${{ inputs.searchapi-tag }}"
+      #
+      # - name: Deploy searchapi chart
+      #   if: contains(env.charts, 'searchapi')
+      #   uses: vimeda/helm@v1.7.0
+      #   with:
+      #     release: searchapi
+      #     namespace: ${{ inputs.environment }}
+      #     chart: ./charts/searchapi
+      #     values: |
+      #       containerPort: 8080
+      #       DSN: ${{ env.DSN }}
+      #       REDIS_HOST: ${{ env.REDIS_HOST }}
+      #       REDIS_PASSWORD: ${{ env.REDIS_PASSWORD }}
+      #       image.repository: ${{ env.ECR_REPOSITORY }}
+      #       image.tag: ${{ env.IMAGE_TAG }}
+      #   env:
+      #     DSN: ${{ secrets.DSN }}
+      #     REDIS_HOST: "redis.${{ inputs.environment }}.svc.cluster.local:6379"
+      #     REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+      #     ECR_REPOSITORY: "${{ secrets.ECR_REGISTRY }}/searchapi"
+      #     IMAGE_TAG: "${{ inputs.environment }}-${{ inputs.searchapi-tag }}"
+      #     NAMESPACE: ${{ inputs.environment }}
+      #     KUBECONFIG: ./kubeconfig.yaml
 
       - name: Deploy web chart without values
         if: contains(env.charts, 'web')
