@@ -11,7 +11,7 @@ permissions:
 jobs:
   get-tags:
     name: Get most recent tags from source repos
-    runs-on: ubuntu-latest'
+    runs-on: ubuntu-latest
     outputs:
       searchapi-tag: ${{ steps.get-searchapi-tag.outputs.tag }}
       web-tag: ${{steps.get-web-tag.outputs.tag }}
@@ -33,7 +33,7 @@ jobs:
       - name: Get latest web tag
         id: get-web-tag
         run: echo "tag=$(git tag --list --sort=v:refname | head -n 1)" >> $GITHUB_OUTPUT
-  smoke_test:
+  smoke-test:
     needs: get-tags
     name: Smoke Test
     runs-on: ubuntu-latest
@@ -65,6 +65,7 @@ jobs:
           SEARCH_API_IMAGE_URI: "${{ secrets.ECR_REGISTRY}}/searchapi:${{ needs.get-tags.outputs.searchapi-tag }}"
           WEB_TAG: "${{ secrets.ECR_REGISTRY}}/web:${{ needs.get-tags.outputs.web-tag }}"
   deploy:
+    needs: smoke-test
     uses: ./.github/workflows/deploy.yml
     with:
       environment: qa
