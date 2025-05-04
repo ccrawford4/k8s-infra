@@ -35,6 +35,7 @@ jobs:
     needs: tag
     uses: ./.github/workflows/deploy.yml
     with:
+      environment: ${{ inputs.target-environment }}
       searchapi-tag: ${{ needs.get-tags.outputs.searchapi-tag }}
       web-tag: ${{ needs.get-tags.outputs.web-tag }}
     secrets:
