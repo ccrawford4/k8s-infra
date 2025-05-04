@@ -77,23 +77,14 @@ resource "aws_security_group" "all_worker_mgmt" {
 resource "aws_security_group" "rds_security_group" {
   name_prefix = "rds-security-group"
   vpc_id      = module.vpc.vpc_id
+  description = "Allow MySQL connections from within the VPC"
 
-  # Allow MySQL traffic from worker group 1
+  # Allow any MySQL connections within the VPC
   ingress {
-    from_port       = var.db_port_number
-    to_port         = var.db_port_number
-    protocol        = "tcp"
-    security_groups = [aws_security_group.worker_group_mgmt_one.id]
-    description     = "Allow MySQL traffic from worker group 1"
-  }
-
-  # Allow MySQL traffic from worker group 2
-  ingress {
-    from_port       = var.db_port_number
-    to_port         = var.db_port_number
-    protocol        = "tcp"
-    security_groups = [aws_security_group.worker_group_mgmt_two.id]
-    description     = "Allow MySQL traffic from worker group 2"
+    from_port   = var.db_port_number
+    to_port     = var.db_port_number
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
   }
 
   # Required for RDS to communicate with AWS services
