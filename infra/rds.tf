@@ -40,7 +40,7 @@ resource "aws_db_subnet_group" "prod" {
 
 resource "aws_db_instance" "prod" {
   allocated_storage      = 10
-  db_name                = "qa"
+  db_name                = "prod"
   engine                 = "mysql"
   engine_version         = "8.0"
   instance_class         = "db.t3.micro"
