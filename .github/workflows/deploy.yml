@@ -172,7 +172,7 @@ jobs:
 
           echo "Waiting for Ingress hostname..."
           while [ -z "$INGRESS_HOST" ] && [ $ATTEMPTS -lt $MAX_ATTEMPTS ]; do
-            INGRESS_HOST=$(kubectl -n ${{ inputs.environment }} get ingress -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}')
+            INGRESS_HOST=$(kubectl -n ingress-nginx get ingress -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}')
             if [ -z "$INGRESS_HOST" ]; then
               echo "Attempt $ATTEMPTS: Ingress hostname not ready, waiting 10 seconds..."
               sleep 10
