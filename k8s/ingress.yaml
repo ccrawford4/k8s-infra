@@ -4,10 +4,10 @@ metadata:
   name: ingress
   namespace: qa
 spec:
-  ingressClassName: nginx-qa
+  ingressClassName: nginx
   rules:
     - host: qa.calum.run
-    - http:
+      http:
         paths:
           - path: /search
             pathType: Exact
@@ -36,11 +36,12 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress
+  namespace: uat
 spec:
-  ingressClassName: nginx-uat
+  ingressClassName: nginx
   rules:
     - host: uat.calum.run
-    - http:
+      http:
         paths:
           - path: /search
             pathType: Exact
@@ -69,11 +70,12 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress
+  namespace: prod
 spec:
-  ingressClassName: nginx-prod
+  ingressClassName: nginx
   rules:
     - host: calum.run
-    - http:
+      http:
         paths:
           - path: /search
             pathType: Exact
