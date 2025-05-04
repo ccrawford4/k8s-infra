@@ -1,3 +1,5 @@
+name: Promote
+
 on:
   workflow_dispatch:
     inputs:
