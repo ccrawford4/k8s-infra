@@ -31,10 +31,3 @@ spec:
       autoPromotionEnabled: false
       previewReplicaCount: 3
       scaleDownDelaySeconds: 300
-env:
-  - name: DSN
-    value: ${DSN}
-  - name: REDIS_HOST
-    value: ${REDIS_HOST}
-  - name: REDIS_PASSWORD
-    value: ${REDIS_PASSWORD}
