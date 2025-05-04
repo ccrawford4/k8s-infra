@@ -21,6 +21,7 @@ SSH_TIMEOUT = 300  # 5 minutes
 HEALTH_CHECK_TIMEOUT = 300  # 5 minutes
 HEALTH_CHECK_INTERVAL = 10  # 10 seconds
 HEALTH_CHECK_URL = "http://localhost:3000"
+INFRA_REPO_URL = "https://github.com/ccrawford4/k8s-infra.git"
 
 def create_ssh_key_file():
     """Create a temporary SSH key file from the environment variable."""
@@ -50,7 +51,7 @@ def launch_ec2_instance():
     response = ec2.run_instances(
         LaunchTemplate={
             'LaunchTemplateId': LAUNCH_TEMPLATE_ID,
-            'Version': '1'
+            'Version': '2'
         },
         MinCount=1,
         MaxCount=1
@@ -117,7 +118,7 @@ def clone_repo(public_ip, key_file):
         ssh.connect(public_ip, username="ec2-user", key_filename=key_file)
         
         # Run the git clone command
-        command = f"git clone ccrawford4/k8s-infra"
+        command = f"git clone {INFRA_REPO_URL}" 
         _, stdout, stderr = ssh.exec_command(command)
         
         # Print output
