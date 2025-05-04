@@ -90,11 +90,17 @@ jobs:
           kubectl get namespace ingress-nginx || kubectl create namespace ingress-nginx
           kubectl get namespace argocd || kubectl create namespace argocd
 
-      - name: Deploy ArgoCD
+      - name: Install ArgoCD
         env:
           KUBECONFIG: ./kubeconfig.yaml
         run: |
           kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+      - name: Install Argo Rollouts
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
+        run: |
+          kubectl apply -n argocd -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
 
       - name: Set charts to deploy
         id: set-charts
@@ -141,7 +147,7 @@ jobs:
           KUBECONFIG: ./kubeconfig.yaml
 
       - name: Re-Deploy SearchAPI chart
-        if: ${{ inputs.environment }} == "qa"
+        if: inputs.environment == 'qa'
         uses: vimeda/helm@v1.7.0
         with:
           release: searchapi
@@ -159,8 +165,10 @@ jobs:
           KUBECONFIG: ./kubeconfig.yaml
 
       - name: Blue/Green Rollout SearchAPI service
-        if: ${{ inputs.environment }} != "qa"
-        run: kubectl -n ${{ inputs.environment }} apply -f k8s/searchapi-rollout.yaml
+        if: inputs.environment != 'qa'
+        run: |
+          envsubst < k8s/searchapi-rollout.yaml > k8s/searchapi-rollout-processed.yaml
+          kubectl -n $NAMESPACE apply -f k8s/searchapi-rollout-processed.yaml
         env:
           NAMESPACE: ${{ inputs.environment }}
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
