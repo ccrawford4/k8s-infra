@@ -27,6 +27,10 @@ jobs:
       target-environment: ${{ inputs.target-environment }}
       searchapi-tag: ${{ inputs.searchapi-tag }}
       web-tag: ${{ inputs.web-tag }}
+    secrets:
+      AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
   deploy:
     needs: tag
     uses: ./.github/workflows/deploy.yml
