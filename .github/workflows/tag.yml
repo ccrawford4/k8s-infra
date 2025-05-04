@@ -59,7 +59,10 @@ jobs:
         run: |
           SOURCE_ENV=""
           TARGET_ENV=""
-          if [ "${{ inputs.environment }}" = "uat" ]; then
+          if [ "${{ inputs.environment }}" = "qa" ]; then
+            SOURCE_ENV=""
+            TARGET_ENV="qa"
+          elif [ "${{ inputs.environment }}" = "uat"]; then
             SOURCE_ENV="qa"
             TARGET_ENV="uat"
           else
