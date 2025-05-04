@@ -104,11 +104,11 @@ jobs:
 
       - name: Setup Argo rollouts config maps and permissions
         run: |
-          kubectl apply -n argocd k8s/argo-rollouts-config.yaml
-          kubectl apply -n argocd k8s/rollouts-configmap-role.yaml
-          kubectl apply -n argocd k8s/rollouts-configmap-rolebinding.yaml
-          kubectl apply -n argocd k8s/rollouts-lease-role.yaml
-          kubectl apply -n argocd k8s/rollouts-lease-rolebinding.yaml
+          kubectl apply -n argocd -f k8s/argo-rollouts-config.yaml
+          kubectl apply -n argocd -f k8s/rollouts-configmap-role.yaml
+          kubectl apply -n argocd -f k8s/rollouts-configmap-rolebinding.yaml
+          kubectl apply -n argocd -f k8s/rollouts-lease-role.yaml
+          kubectl apply -n argocd -f k8s/rollouts-lease-rolebinding.yaml
         env:
           KUBECONFIG: ./kubeconfig.yaml
 
