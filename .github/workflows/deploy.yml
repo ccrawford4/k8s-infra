@@ -132,33 +132,13 @@ jobs:
         env:
           KUBECONFIG: ./kubeconfig.yaml
 
-      # - name: Deploy SearchAPI chart
-      #   if: inputs.environment == 'qa'
-      #   uses: vimeda/helm@v1.7.0
-      #   with:
-      #     release: searchapi
-      #     namespace: ${{ inputs.environment }}
-      #     chart: ./charts/searchapi
-      #     values: |
-      #       containerPort: 8080
-      #       image:
-      #         repository: ${{ secrets.ECR_REGISTRY }}/searchapi
-      #         tag: ${{ inputs.environment }}-${{ inputs.searchapi-tag }}
-      #       DSN: ${{ secrets.DSN }}
-      #       REDIS_HOST: redis.${{ inputs.environment }}.svc.cluster.local:6379
-      #       REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-      #   env:
-      #     KUBECONFIG: ./kubeconfig.yaml
-
       - name: Install Argo Rollouts kubectl plugin
-        # if: inputs.environment != 'qa'
         run: |
           curl -LO https://github.com/argoproj/argo-rollouts/releases/latest/download/kubectl-argo-rollouts-linux-amd64
           chmod +x ./kubectl-argo-rollouts-linux-amd64
           sudo mv ./kubectl-argo-rollouts-linux-amd64 /usr/local/bin/kubectl-argo-rollouts
 
       - name: Blue/Green Rollout SearchAPI service
-        # if: inputs.environment != 'qa'
         run: |
           kubectl -n $NAMESPACE apply -f k8s/searchapi-service.yaml
           envsubst < k8s/searchapi-rollout.yaml | kubectl -n $NAMESPACE apply -f -
@@ -173,7 +153,6 @@ jobs:
           KUBECONFIG: ./kubeconfig.yaml
 
       - name: Blue/Green Rollout Web service
-        # if: inputs.environment != 'qa'
         run: |
           kubectl -n $NAMESPACE apply -f k8s/web-service.yaml
           envsubst < k8s/web-rollout.yaml | kubectl -n $NAMESPACE apply -f -
@@ -191,26 +170,10 @@ jobs:
           GOOGLE_SECRET: ${{ secrets.GOOGLE_SECRET }}
           KUBECONFIG: ./kubeconfig.yaml
 
-      # - name: Deploy Web chart
-      #   if: inputs.environment == 'qa'
-      #   uses: vimeda/helm@v1.7.0
-      #   with:
-      #     release: web
-      #     namespace: ${{ inputs.environment }}
-      #     chart: ./charts/web
-      #     values: |
-      #       image:
-      #         repository: ${{ secrets.ECR_REGISTRY }}/web
-      #         tag: ${{ inputs.environment }}-${{ inputs.web-tag }}
-      #       API_ENDPOINT: http://${{ secrets.HOSTNAME }}/search
-      #       NEXTAUTH_URL: http://${{ secrets.HOSTNAME }}/api/auth
-      #       GITHUB_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
-      #       GITHUB_SECRET: ${{ secrets.GH_SECRET }}
-      #       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-      #       GOOGLE_ID: ${{ secrets.GOOGLE_ID }}
-      #       GOOGLE_SECRET: ${{ secrets.GOOGLE_SECRET }}
-      #   env:
-      #     KUBECONFIG: ./kubeconfig.yaml
+      - name: Deploy the cert manager
+        run: |
+          kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.1/cert-manager.yaml
+          kubectl apply -f k8s/cluster-issuer.yaml
 
       - name: Deploy ingress
         run: kubectl apply -f k8s/ingress.yaml

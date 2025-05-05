@@ -3,8 +3,17 @@ kind: Ingress
 metadata:
   name: ingress
   namespace: qa
+  annotations:
+    # Ensure HTTPS
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Let's Encrypt configuration
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - qa.calum.run
+      secretName: qa-calum-run-tls
   rules:
     - host: qa.calum.run
       http:
@@ -30,15 +39,21 @@ spec:
                 name: web
                 port:
                   number: 3000
-
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress
   namespace: uat
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - uat.calum.run
+      secretName: uat-calum-run-tls
   rules:
     - host: uat.calum.run
       http:
@@ -64,15 +79,21 @@ spec:
                 name: web
                 port:
                   number: 3000
-
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress
   namespace: prod
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - calum.run
+      secretName: calum-run-tls
   rules:
     - host: calum.run
       http:
