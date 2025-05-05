@@ -161,8 +161,8 @@ jobs:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           IMAGE_TAG: ${{ inputs.web-tag }}
           NAMESPACE: ${{ inputs.environment }}
-          API_ENDPOINT: http://${{ secrets.HOSTNAME }}/search
-          NEXTAUTH_URL: http://${{ secrets.HOSTNAME }}/api/auth
+          API_ENDPOINT: https://${{ secrets.HOSTNAME }}/search
+          NEXTAUTH_URL: https://${{ secrets.HOSTNAME }}/api/auth
           GITHUB_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
           GITHUB_SECRET: ${{ secrets.GH_SECRET }}
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
