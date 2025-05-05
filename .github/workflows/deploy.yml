@@ -180,6 +180,8 @@ jobs:
           envsubst < k8s/web-rollout.yaml | kubectl -n $NAMESPACE apply -f -
           kubectl argo rollouts set image web web="$ECR_REGISTRY/web:$IMAGE_TAG" -n $NAMESPACE
         env:
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          IMAGE_TAG: ${{ inputs.web-tag }}
           NAMESPACE: ${{ inputs.environment }}
           API_ENDPOINT: http://${{ secrets.HOSTNAME }}/search
           NEXTAUTH_URL: http://${{ secrets.HOSTNAME }}/api/auth
