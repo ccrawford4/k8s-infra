@@ -147,6 +147,9 @@ jobs:
           kubectl -n $NAMESPACE apply -f k8s/service.yaml
           envsubst < k8s/rollout.yaml | kubectl -n $NAMESPACE apply -f -
 
+          echo "SEARCHAPI_IMAGE: $ECR_REGISTRY/searchapi:$SEARCHAPI_IMAGE_TAG"
+          echo "STATSAPI_IMAGE: $ECR_REGISTRY/statsapi:$STATSAPI_IMAGE_TAG"
+
           # Update the images
           kubectl argo rollouts set image searchapi searchapi="$ECR_REGISTRY/searchapi:$SEARCHAPI_IMAGE_TAG" -n $NAMESPACE
           kubectl argo rollouts set image web web="$ECR_REGISTRY/web:$WEB_IMAGE_TAG" -n $NAMESPACE
