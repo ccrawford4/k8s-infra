@@ -25,6 +25,9 @@ on:
       web-tag:
         type: string
         description: The tag of the web image being promoted
+      statsapi-tag:
+        type: string
+        description: The tag of the searchapi image being promoted
     secrets:
       AWS_ACCOUNT:
         required: true
