@@ -93,6 +93,7 @@ jobs:
           kubectl get namespace argo-rollouts || kubectl create namespace argo-rollouts
 
       - name: Install Argo-Rollouts
+        if: inputs.environment != 'qa'
         run: kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
         env:
           KUBECONFIG: ./kubeconfig.yaml
@@ -142,7 +143,7 @@ jobs:
           KUBECONFIG: ./kubeconfig.yaml
 
       - name: Deploy SearchAPI chart
-        if: inputs.environment != 'qa'
+        if: inputs.environment == 'qa'
         uses: vimeda/helm@v1.7.0
         with:
           release: searchapi
@@ -158,6 +159,14 @@ jobs:
             REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
         env:
           KUBECONFIG: ./kubeconfig.yaml
+
+      - name: Install ArgoCD CLI
+        if: inputs.environment != 'qa'
+        run: |
+          curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+          rm argocd-linux-amd64
+          argocd version --client
 
       - name: Blue/Green Rollout SearchAPI service
         if: inputs.environment != 'qa'
