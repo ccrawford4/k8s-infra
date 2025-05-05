@@ -2,9 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: searchapi
-  namespace:
-    uat
-    # namespace: ${NAMESPACE}
+  namespace: ${NAMESPACE}
 spec:
   replicas: 3
   revisionHistoryLimit: 2
@@ -18,7 +16,7 @@ spec:
     spec:
       containers:
         - name: searchapi
-          image: ${ECR_REGISTRY}/searchapi:${IMAGE_TAG}
+          image: "${ECR_REGISTRY}/searchapi:${IMAGE_TAG}"
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
