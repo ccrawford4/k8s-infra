@@ -212,3 +212,8 @@ jobs:
             GOOGLE_SECRET: ${{ secrets.GOOGLE_SECRET }}
         env:
           KUBECONFIG: ./kubeconfig.yaml
+
+      - name: Deploy ingress
+        run: kubectl apply -f k8s/ingress.yaml
+        env:
+          KUBECONFIG: ./kubeconfig.yaml
