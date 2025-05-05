@@ -3,9 +3,9 @@ kind: Service
 metadata:
   name: searchapi
 spec:
-  type: {{ .Values.service.type }}
+  type: ClusterIP
   ports:
-    - port: {{ .Values.service.port }}
+    - port: 8080
       targetPort: http
       protocol: TCP
       name: http
@@ -17,9 +17,9 @@ kind: Service
 metadata:
   name: searchapi-preview
 spec:
-  type: {{ .Values.service.type }}
+  type: ClusterIP
   ports:
-    - port: {{ .Values.service.port }}
+    - port: 8080
       targetPort: http
       protocol: TCP
       name: http
