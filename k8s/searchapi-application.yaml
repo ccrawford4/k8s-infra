@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: backend
+  name: searchapi
   namespace: argocd
 spec:
   project: default
@@ -10,8 +10,8 @@ spec:
     path: charts/searchapi
     targetRevision: HEAD
   destination:
-    server: https://kubernetes.default.svc
-    namespace: default
+    server: https://59E6D83824B46388659BFC654EF08B84.gr7.us-east-1.eks.amazonaws.com
+    namespace: uat
   syncPolicy:
     automated:
       prune: true

@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: frontend
+  name: web
   namespace: argocd
 spec:
   project: default
@@ -10,8 +10,8 @@ spec:
     path: charts/web
     targetRevision: HEAD
   destination:
-    server: https://kubernetes.default.svc
-    namespace: default
+    server: https://kubernetes.web.svc
+    namespace: uat
   syncPolicy:
     automated:
       prune: true
