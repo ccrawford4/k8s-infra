@@ -44,6 +44,8 @@ on:
         required: true
       GOOGLE_SECRET:
         required: true
+      REDIS_HOST:
+        required: true
       REDIS_PASSWORD:
         required: true
       ECR_REGISTRY:
