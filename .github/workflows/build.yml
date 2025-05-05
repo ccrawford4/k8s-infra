@@ -18,7 +18,7 @@ jobs:
     outputs:
       searchapi-tag: ${{ steps.get-searchapi-tag.outputs.tag }}
       web-tag: ${{steps.get-web-tag.outputs.tag }}
-      statsapi-tag: ${{ stesp.get-stats-tag.outputs.tag }}
+      statsapi-tag: ${{ steps.get-stats-tag.outputs.tag }}
     steps:
       - name: Checkout Searchapi Repository
         uses: actions/checkout@v4
