@@ -164,6 +164,7 @@ jobs:
         run: |
           kubectl -n $NAMESPACE apply -f charts/searchapi/templates/service.yaml
           envsubst < k8s/searchapi-rollout.yaml | kubectl -n $NAMESPACE apply -f -
+          kubectl argo rollouts set image searchapi searchapi="$ECR_REGISTRY/searchapi:$IMAGE_TAG" -n $NAMESPACE
         env:
           NAMESPACE: ${{ inputs.environment }}
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
@@ -172,11 +173,6 @@ jobs:
           REDIS_HOST: ${{ secrets.REDIS_HOST }}
           REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
           KUBECONFIG: ./kubeconfig.yaml
-
-      - name: Deploy Ingress service
-        env:
-          KUBECONFIG: ./kubeconfig.yaml
-        run: kubectl apply -f k8s/ingress.yaml
 
       - name: Deploy Web chart
         if: contains(env.charts, 'web')
