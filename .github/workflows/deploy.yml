@@ -161,7 +161,7 @@ jobs:
       - name: Blue/Green Rollout SearchAPI service
         if: inputs.environment != 'qa'
         run: |
-          kubectl -n $NAMESPACE apply -f charts/searchapi/templates/service.yaml
+          kubectl -n $NAMESPACE apply -f k8s/searchapi-service.yaml
           envsubst < k8s/searchapi-rollout.yaml | kubectl -n $NAMESPACE apply -f -
           kubectl argo rollouts set image searchapi searchapi="$ECR_REGISTRY/searchapi:$IMAGE_TAG" -n $NAMESPACE
         env:
@@ -176,7 +176,7 @@ jobs:
       - name: Blue/Green Rollout Web service
         if: inputs.environment != 'qa'
         run: |
-          kubectl -n $NAMESPACE apply -f charts/web/templates/service.yaml
+          kubectl -n $NAMESPACE apply -f k8s/web-service.yaml
           envsubst < k8s/web-rollout.yaml | kubectl -n $NAMESPACE apply -f -
           kubectl argo rollouts set image web web="$ECR_REGISTRY/web:$IMAGE_TAG" -n $NAMESPACE
         env:

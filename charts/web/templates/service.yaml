@@ -1,27 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: web
+  name: {{ include "web.fullname" . }}
+  labels:
+    {{- include "web.labels" . | nindent 4 }}
 spec:
-  type: ClusterIP
+  type: {{ .Values.service.type }}
   ports:
-    - port: 3000
+    - port: {{ .Values.service.port }}
       targetPort: http
       protocol: TCP
       name: http
   selector:
-    app: web
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: web-preview
-spec:
-  type: ClusterIP
-  ports:
-    - port: 3000
-      targetPort: http
-      protocol: TCP
-      name: http
-  selector:
-    app: web
+    {{- include "web.selectorLabels" . | nindent 4 }}
