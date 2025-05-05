@@ -122,7 +122,6 @@ jobs:
           KUBECONFIG: ./kubeconfig.yaml
 
       - name: Deploy Redis chart
-        if: inputs.environment == 'qa'
         uses: vimeda/helm@v1.7.0
         with:
           release: redis
