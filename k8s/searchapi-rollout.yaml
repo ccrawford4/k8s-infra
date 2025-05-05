@@ -9,6 +9,7 @@ spec:
   selector:
     matchLabels:
       app: searchapi
+      app.kubernetes.io/instance: searchapi
   template:
     metadata:
       labels:
