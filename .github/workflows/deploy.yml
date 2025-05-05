@@ -98,15 +98,6 @@ jobs:
         env:
           KUBECONFIG: ./kubeconfig.yaml
 
-      - name: Set charts to deploy
-        id: set-charts
-        run: |
-          if [ "${{ inputs.environment }}" == "qa" ]; then
-            echo "charts=searchapi mysql web redis" >> $GITHUB_ENV
-          else
-            echo "charts=searchapi web redis" >> $GITHUB_ENV
-          fi
-
       - name: Deploy Ingress Controller
         env:
           KUBECONFIG: ./kubeconfig.yaml
@@ -116,7 +107,7 @@ jobs:
             --namespace ingress-nginx
 
       - name: Deploy MySQL chart
-        if: contains(env.charts, 'mysql')
+        if: inputs.environment == 'qa'
         uses: vimeda/helm@v1.7.0
         with:
           release: mysql
@@ -131,7 +122,7 @@ jobs:
           KUBECONFIG: ./kubeconfig.yaml
 
       - name: Deploy Redis chart
-        if: contains(env.charts, 'redis')
+        if: inputs.environment == 'qa'
         uses: vimeda/helm@v1.7.0
         with:
           release: redis
@@ -161,6 +152,7 @@ jobs:
           KUBECONFIG: ./kubeconfig.yaml
 
       - name: Install Argo Rollouts kubectl plugin
+        if: inputs.environment != 'qa'
         run: |
           curl -LO https://github.com/argoproj/argo-rollouts/releases/latest/download/kubectl-argo-rollouts-linux-amd64
           chmod +x ./kubectl-argo-rollouts-linux-amd64
@@ -181,8 +173,24 @@ jobs:
           REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
           KUBECONFIG: ./kubeconfig.yaml
 
+      - name: Blue/Green Rollout Web service
+        if: inputs.environment != 'qa'
+        run: |
+          kubectl -n $NAMESPACE apply -f charts/web/templates/service.yaml
+          envsubst < k8s/web-rollout.yaml | kubectl -n $NAMESPACE apply -f -
+          kubectl argo rollouts set image web web="$ECR_REGISTRY/web:$IMAGE_TAG" -n $NAMESPACE
+        env:
+          API_ENDPOINT: http://${{ secrets.HOSTNAME }}/search
+          NEXTAUTH_URL: http://${{ secrets.HOSTNAME }}/api/auth
+          GITHUB_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
+          GITHUB_SECRET: ${{ secrets.GH_SECRET }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          GOOGLE_ID: ${{ secrets.GOOGLE_ID }}
+          GOOGLE_SECRET: ${{ secrets.GOOGLE_SECRET }}
+          KUBECONFIG: ./kubeconfig.yaml
+
       - name: Deploy Web chart
-        if: contains(env.charts, 'web')
+        if: inputs.environment == 'qa'
         uses: vimeda/helm@v1.7.0
         with:
           release: web
@@ -201,8 +209,3 @@ jobs:
             GOOGLE_SECRET: ${{ secrets.GOOGLE_SECRET }}
         env:
           KUBECONFIG: ./kubeconfig.yaml
-
-      - name: Print deployment URLs
-        run: |
-          echo "Deployment complete!"
-          echo "Application is accessible at: http://${{ env.INGRESS_HOST }}"
