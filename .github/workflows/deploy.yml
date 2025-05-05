@@ -151,11 +151,6 @@ jobs:
           kubectl argo rollouts set image searchapi searchapi="$ECR_REGISTRY/searchapi:$SEARCHAPI_IMAGE_TAG" -n $NAMESPACE
           kubectl argo rollouts set image web web="$ECR_REGISTRY/web:$WEB_IMAGE_TAG" -n $NAMESPACE
           kubectl argo rollouts set image statsapi statsapi="$ECR_REGISTRY/statsapi:$STATSAPI_IMAGE_TAG" -n $NAMESPACE
-
-          # Promote 
-          kubectl argo rollouts promote searchapi
-          kubectl argo rollouts promote web
-          kubectl argo rollouts promote statsapi
         env:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           IMAGE_TAG: ${{ inputs.web-tag }}
