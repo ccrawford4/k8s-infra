@@ -13,6 +13,8 @@ spec:
     metadata:
       labels:
         app: searchapi
+        app.kubernetes.io/instance: searchapi
+        app.kubernetes.io/name: searchapi
     spec:
       containers:
         - name: searchapi
