@@ -91,28 +91,6 @@ jobs:
           kubectl get namespace ${{ inputs.environment }} || kubectl create namespace ${{ inputs.environment }}
           kubectl get namespace ingress-nginx || kubectl create namespace ingress-nginx
           kubectl get namespace argo-rollouts || kubectl create namespace argo-rollouts
-      #
-      # - name: Install ArgoCD
-      #   env:
-      #     KUBECONFIG: ./kubeconfig.yaml
-      #   run: |
-      #     kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-      #
-      # - name: Install Argo Rollouts
-      #   env:
-      #     KUBECONFIG: ./kubeconfig.yaml
-      #   run: |
-      #     kubectl apply -n argocd -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
-      #
-      # - name: Setup Argo rollouts config maps and permissions
-      #   run: |
-      #     kubectl apply -n argocd -f k8s/argo-rollouts-config.yaml
-      #     kubectl apply -n argocd -f k8s/rollouts-configmap-role.yaml
-      #     kubectl apply -n argocd -f k8s/rollouts-configmap-rolebinding.yaml
-      #     kubectl apply -n argocd -f k8s/rollouts-lease-role.yaml
-      #     kubectl apply -n argocd -f k8s/rollouts-lease-rolebinding.yaml
-      # env:
-      #   KUBECONFIG: ./kubeconfig.yaml
 
       - name: Install Argo-Rollouts
         run: kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
