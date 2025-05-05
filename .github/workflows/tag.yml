@@ -91,7 +91,7 @@ jobs:
           echo "NEW_SEARCHAPI_TAG=$NEW_SEARCHAPI_TAG" >> $GITHUB_ENV
           echo "OLD_WEB_TAG=$OLD_WEB_TAG" >> $GITHUB_ENV
           echo "NEW_WEB_TAG=$NEW_WEB_TAG" >> $GITHUB_ENV
-          echo "OLD_STATSHAPI_TAG=$OLD_STATSAPI_TAG" >> $GITHUB_ENV
+          echo "OLD_STATSAPI_TAG=$OLD_STATSAPI_TAG" >> $GITHUB_ENV
           echo "NEW_STATSAPI_TAG=$NEW_STATSAPI_TAG" >> $GITHUB_ENV
           # Set the output of the step
           echo "environment=$TARGET_ENV" >> $GITHUB_OUTPUT
