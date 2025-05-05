@@ -1,15 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
-  name: searchapi-rollout
-  namespace: ${NAMESPACE}
+  name: searchapi
+  namespace:
+    uat
+    # namespace: ${NAMESPACE}
 spec:
   replicas: 3
   revisionHistoryLimit: 2
   selector:
     matchLabels:
       app: searchapi
-      app.kubernetes.io/instance: searchapi
   template:
     metadata:
       labels:
