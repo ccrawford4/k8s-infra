@@ -93,7 +93,6 @@ jobs:
           kubectl get namespace argo-rollouts || kubectl create namespace argo-rollouts
 
       - name: Install Argo-Rollouts
-        if: inputs.environment != 'qa'
         run: kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
         env:
           KUBECONFIG: ./kubeconfig.yaml
