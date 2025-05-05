@@ -84,7 +84,7 @@ jobs:
             echo "test"
             OLD_SEARCHAPI_TAG="${{ inputs.searchapi-tag }}"
             OLD_WEB_TAG="${{ inputs.web-tag }}"
-            OLD_STATSAPI_TAG="${{ inputs.searchapi-tag }}"
+            OLD_STATSAPI_TAG="${{ inputs.statsapi-tag }}"
           fi
             
           echo "OLD_SEARCHAPI_TAG=$OLD_SEARCHAPI_TAG" >> $GITHUB_ENV
