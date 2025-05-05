@@ -162,7 +162,7 @@ jobs:
           KUBECONFIG: ./kubeconfig.yaml
 
       - name: Deploy SearchAPI chart
-        if: contains(env.charts, 'searchapi')
+        if: inputs.environment != 'qa'
         uses: vimeda/helm@v1.7.0
         with:
           release: searchapi
@@ -181,7 +181,9 @@ jobs:
 
       - name: Blue/Green Rollout SearchAPI service
         if: inputs.environment != 'qa'
-        run: envsubst < k8s/searchapi-rollout.yaml | kubectl -n $NAMESPACE apply -f -
+        run: |
+          kubectl -n $NAMESPACE apply -f charts/searchapi/templates/service.yaml
+          envsubst < k8s/searchapi-rollout.yaml | kubectl -n $NAMESPACE apply -f -
         env:
           NAMESPACE: ${{ inputs.environment }}
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
