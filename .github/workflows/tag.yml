@@ -73,23 +73,25 @@ jobs:
           NEW_SEARCHAPI_TAG="${TARGET_ENV}-${{ inputs.searchapi-tag }}"
           OLD_WEB_TAG="${SOURCE_ENV}-${{ inputs.web-tag }}"
           NEW_WEB_TAG="${TARGET_ENV}-${{ inputs.web-tag }}"
+          OLD_STATSAPI_TAG="${SOURCE_ENV}-${{ inputs.statsapi-tag }}"
+          NEW_STATSAPI_TAG="${TARGET_ENV}-${{ inputs.statsapi-tag }}"
 
           # If promoting to qa then it doesn't have a prefix
           if [ "${{ inputs.target-environment }}" = "qa" ]; then
             echo "test"
             OLD_SEARCHAPI_TAG="${{ inputs.searchapi-tag }}"
             OLD_WEB_TAG="${{ inputs.web-tag }}"
+            OLD_STATSAPI_TAG="${{ inputs.searchapi-tag }}"
           fi
             
           echo "OLD_SEARCHAPI_TAG=$OLD_SEARCHAPI_TAG" >> $GITHUB_ENV
           echo "NEW_SEARCHAPI_TAG=$NEW_SEARCHAPI_TAG" >> $GITHUB_ENV
           echo "OLD_WEB_TAG=$OLD_WEB_TAG" >> $GITHUB_ENV
           echo "NEW_WEB_TAG=$NEW_WEB_TAG" >> $GITHUB_ENV
+          echo "OLD_STATSHAPI_TAG=$OLD_STATSAPI_TAG" >> $GITHUB_ENV
+          echo "NEW_STATSAPI_TAG=$NEW_STATSAPI_TAG" >> $GITHUB_ENV
           # Set the output of the step
           echo "environment=$TARGET_ENV" >> $GITHUB_OUTPUT
-
-          echo "OLD_SEARCHAPI_TAG: $OLD_SEARCHAPI_TAG"
-          echo "NEW_SEARCHAPI_TAG: $NEW_SEARCHAPI_TAG"
       - name: Re-tag and push images
         env:
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
@@ -97,10 +99,13 @@ jobs:
         run: |
           echo "Pulling old images"
           docker pull $ECR_REGISTRY/searchapi:$OLD_SEARCHAPI_TAG
+          docker pull $ECR_REGISTRY/statsapi:$OLD_STATSAPI_TAG
           docker pull $ECR_REGISTRY/web:$OLD_WEB_TAG
           echo "Re-tagging images"
           docker tag $ECR_REGISTRY/searchapi:$OLD_SEARCHAPI_TAG $ECR_REGISTRY/searchapi:$NEW_SEARCHAPI_TAG
+          docker tag $ECR_REGISTRY/statsapi:$OLD_STATSAPI_TAG $ECR_REGISTRY/statsapi:$NEW_STATSAPI_TAG
           docker tag $ECR_REGISTRY/web:$OLD_WEB_TAG $ECR_REGISTRY/web:$NEW_WEB_TAG
           echo "Pushing new tags"
           docker push $ECR_REGISTRY/searchapi:$NEW_SEARCHAPI_TAG
+          docker push $ECR_REGISTRY/statsapi:$NEW_STATSAPI_TAG
           docker push $ECR_REGISTRY/web:$NEW_WEB_TAG

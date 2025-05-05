@@ -1,0 +1,93 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: searchapi
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: searchapi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: searchapi-preview
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: searchapi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  labels:
+    app: web
+    app.kubernetes.io/instance: web
+    app.kubernetes.io/name: web
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    app: web
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-preview
+  labels:
+    app: web
+    app.kubernetes.io/instance: web
+    app.kubernetes.io/name: web
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    app: web
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: statsapi
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: statsapi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: statsapi-preview
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: statsapi
+---
+

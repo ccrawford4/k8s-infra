@@ -4,9 +4,7 @@ metadata:
   name: ingress
   namespace: qa
   annotations:
-    # Ensure HTTPS
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    # Let's Encrypt configuration
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: nginx
@@ -30,6 +28,13 @@ spec:
             backend:
               service:
                 name: searchapi
+                port:
+                  number: 8080
+          - path: /stats
+            pathType: Prefix
+            backend:
+              service:
+                name: statsapi
                 port:
                   number: 8080
           - path: /
@@ -72,6 +77,13 @@ spec:
                 name: searchapi
                 port:
                   number: 8080
+          - path: /stats
+            pathType: Prefix
+            backend:
+              service:
+                name: statsapi
+                port:
+                  number: 8080
           - path: /
             pathType: Prefix
             backend:
@@ -110,6 +122,13 @@ spec:
             backend:
               service:
                 name: searchapi
+                port:
+                  number: 8080
+          - path: /stats
+            pathType: Prefix
+            backend:
+              service:
+                name: statsapi
                 port:
                   number: 8080
           - path: /

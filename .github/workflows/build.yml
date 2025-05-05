@@ -18,6 +18,7 @@ jobs:
     outputs:
       searchapi-tag: ${{ steps.get-searchapi-tag.outputs.tag }}
       web-tag: ${{steps.get-web-tag.outputs.tag }}
+      statsapi-tag: ${{ stesp.get-stats-tag.outputs.tag }}
     steps:
       - name: Checkout Searchapi Repository
         uses: actions/checkout@v4
@@ -35,6 +36,14 @@ jobs:
           run: echo "tag=$(git tag --list --sort=v:refname | head -n 1 | sed 's/^.//')" >> $GITHUB_OUTPUT
       - name: Get latest web tag
         id: get-web-tag
+        run: echo "tag=$(git tag --list --sort=v:refname | head -n 1 | sed 's/^.//')" >> $GITHUB_OUTPUT
+      - name: Checkout Statsapi Repository
+        uses: actions/checkout@v4
+        with:
+          repository: ccrawford4/stats
+          fetch-tags: true
+      - name: Get latest statsapi tag
+        id: get-stats-tag
         run: echo "tag=$(git tag --list --sort=v:refname | head -n 1 | sed 's/^.//')" >> $GITHUB_OUTPUT
   smoke-test:
     needs: get-tags
@@ -67,6 +76,7 @@ jobs:
           EC2_USER: ${{ secrets.EC2_USER }}
           SEARCH_API_IMAGE_URI: "${{ secrets.ECR_REGISTRY}}/searchapi:${{ needs.get-tags.outputs.searchapi-tag }}"
           WEB_TAG: "${{ secrets.ECR_REGISTRY}}/web:${{ needs.get-tags.outputs.web-tag }}"
+          STATS_API_IMAGE_URI: "${{ secrets.ECR_REGISTRY}}/statsapi:${{ needs.get-tags.outputs.statsapi-tag }}"
   tag:
     needs: [get-tags, smoke-test]
     uses: ./.github/workflows/tag.yml
@@ -74,6 +84,7 @@ jobs:
       target-environment: qa
       searchapi-tag: ${{ needs.get-tags.outputs.searchapi-tag }}
       web-tag: ${{ needs.get-tags.outputs.web-tag }}
+      statsapi-tag: ${{ needs.get-tags.outputs.statsapi-tag }}
     secrets:
       AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
       AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
@@ -85,6 +96,7 @@ jobs:
       environment: qa
       searchapi-tag: ${{ needs.get-tags.outputs.searchapi-tag }}
       web-tag: ${{ needs.get-tags.outputs.web-tag }}
+      statsapi-tag: ${{ needs.get-tags.outputs.statsapi-tag }}
     secrets:
       AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

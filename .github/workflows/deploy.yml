@@ -15,6 +15,10 @@ on:
         type: string
         required: true
         description: "Tag for the web image"
+      statsapi-tag:
+        type: string
+        required: true
+        description: "Tag for the statsapi image"
     secrets:
       AWS_ACCOUNT:
         required: true
@@ -137,25 +141,27 @@ jobs:
           chmod +x ./kubectl-argo-rollouts-linux-amd64
           sudo mv ./kubectl-argo-rollouts-linux-amd64 /usr/local/bin/kubectl-argo-rollouts
 
-      - name: Blue/Green Rollout SearchAPI service
-        run: |
-          kubectl -n $NAMESPACE apply -f k8s/searchapi-service.yaml
-          envsubst < k8s/searchapi-rollout.yaml | kubectl -n $NAMESPACE apply -f -
-          kubectl argo rollouts set image searchapi searchapi="$ECR_REGISTRY/searchapi:$IMAGE_TAG" -n $NAMESPACE
-        env:
-          NAMESPACE: ${{ inputs.environment }}
-          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-          IMAGE_TAG: ${{ inputs.searchapi-tag }}
-          DSN: ${{ secrets.DSN }}
-          REDIS_HOST: redis.${{ inputs.environment }}.svc.cluster.local:6379
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-          KUBECONFIG: ./kubeconfig.yaml
+      # - name: Blue/Green Rollout SearchAPI service
+      #   run: |
+      #     kubectl -n $NAMESPACE apply -f k8s/searchapi-service.yaml
+      #     envsubst < k8s/searchapi-rollout.yaml | kubectl -n $NAMESPACE apply -f -
+      #     kubectl argo rollouts set image searchapi searchapi="$ECR_REGISTRY/searchapi:$IMAGE_TAG" -n $NAMESPACE
+      #   env:
+      #     NAMESPACE: ${{ inputs.environment }}
+      #     ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+      #     IMAGE_TAG: ${{ inputs.searchapi-tag }}
+      #     DSN: ${{ secrets.DSN }}
+      #     REDIS_HOST: redis.${{ inputs.environment }}.svc.cluster.local:6379
+      #     REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+      #     KUBECONFIG: ./kubeconfig.yaml
 
-      - name: Blue/Green Rollout Web service
+      - name: Blue/Green rollout for services
         run: |
-          kubectl -n $NAMESPACE apply -f k8s/web-service.yaml
-          envsubst < k8s/web-rollout.yaml | kubectl -n $NAMESPACE apply -f -
-          kubectl argo rollouts set image web web="$ECR_REGISTRY/web:$IMAGE_TAG" -n $NAMESPACE
+          kubectl -n $NAMESPACE apply -f k8s/service.yaml
+          envsubst < k8s/rollout.yaml | kubectl -n $NAMESPACE apply -f -
+          kubectl argo rollouts set image searchapi searchapi="$ECR_REGISTRY/searchapi:$SEARCHAPI_IMAGE_TAG" -n $NAMESPACE
+          kubectl argo rollouts set image web web="$ECR_REGISTRY/web:$WEB_IMAGE_TAG" -n $NAMESPACE
+          kubectl argo rollouts set stats statsapi statsapi="$ECR_REGISTRY/statsapi:$STATSAPI_IMAGE_TAG" -n $NAMESPACE
         env:
           ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
           IMAGE_TAG: ${{ inputs.web-tag }}
@@ -168,7 +174,30 @@ jobs:
           GOOGLE_ID: ${{ secrets.GOOGLE_ID }}
           GOOGLE_SECRET: ${{ secrets.GOOGLE_SECRET }}
           KUBECONFIG: ./kubeconfig.yaml
+          SEARCHAPI_IMAGE_TAG: ${{ inputs.searchapi-tag }}
+          STATSAPI_IMAGE_TAG: ${{ inputs.statsapi-tag }}
+          WEB_IMAGE_TAG: ${{ inputs.web-tag }}
+          DSN: ${{ secrets.DSN }}
+          REDIS_HOST: redis.${{ inputs.environment }}.svc.cluster.local:6379
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
 
+      # - name: Blue/Green Rollout Web service
+      #   run: |
+      #     kubectl -n $NAMESPACE apply -f k8s/web-service.yaml
+      #     envsubst < k8s/web-rollout.yaml | kubectl -n $NAMESPACE apply -f -
+      #     kubectl argo rollouts set image web web="$ECR_REGISTRY/web:$IMAGE_TAG" -n $NAMESPACE
+      #   env:
+      #     ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+      #     IMAGE_TAG: ${{ inputs.web-tag }}
+      #     NAMESPACE: ${{ inputs.environment }}
+      #     API_ENDPOINT: https://${{ secrets.HOSTNAME }}/search
+      #     NEXTAUTH_URL: https://${{ secrets.HOSTNAME }}/api/auth
+      #     GITHUB_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
+      #     GITHUB_SECRET: ${{ secrets.GH_SECRET }}
+      #     NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      #     GOOGLE_ID: ${{ secrets.GOOGLE_ID }}
+      #     GOOGLE_SECRET: ${{ secrets.GOOGLE_SECRET }}
+      #
       - name: Deploy the cert manager
         run: |
           kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.1/cert-manager.yaml

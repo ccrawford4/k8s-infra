@@ -14,6 +14,7 @@ AWS_REGION = os.environ.get('AWS_REGION')
 EC2_SSH_KEY = os.environ.get('EC2_SSH_KEY')
 EC2_USER = os.environ.get('EC2_USER')
 SEARCHAPI_IMAGE_URI = os.environ.get('SEARCHAPI_IMAGE_URI')
+STATSAPI_IMAGE_URI = os.environ.get('STATSAPI_IMAGE_URI')
 WEB_IMAGE_URI = os.environ.get('WEB_IMAGE_URI')
 
 # Constants
@@ -196,6 +197,7 @@ def run_docker_compose(public_ip, key_file):
     docker_compose_command = f"""
     cd ~/k8s-infra
     echo "SEARCHAPI_IMAGE_URI={SEARCHAPI_IMAGE_URI}" > .env
+    echo "STATSAPI_IMAGE_URI={STATSAPI_IMAGE_URI}" > .env
     echo "WEB_IMAGE_URI={WEB_IMAGE_URI}" > .env
     docker-compose up -d
     """

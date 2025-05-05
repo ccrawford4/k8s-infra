@@ -32,6 +32,19 @@ services:
       DSN: root:random@tcp(mysql:3306)/dev?charset=utf8mb4&parseTime=true&loc=Local
       REDIS_HOST: redis:6379
       REDIS_PASSWORD: random
+  statsapi:
+    image: ${STATSAPI_IMAGE_URI}
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      DSN: root:random@tcp(mysql:3306)/dev?charset=utf8mb4&parseTime=true&loc=Local
+      REDIS_HOST: redis:6379
+      REDIS_PASSWORD: random
   web:
     image: ${WEB_IMAGE_URI}
     ports:

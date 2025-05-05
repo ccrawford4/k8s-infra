@@ -15,6 +15,9 @@ on:
       web-tag:
         type: string
         description: The tag of the web image being promoted
+      statsapi-tag:
+        type: string
+        description: The tag of the statsapi image being promoted
 
 permissions:
   id-token: write
@@ -26,6 +29,7 @@ jobs:
     with:
       target-environment: ${{ inputs.target-environment }}
       searchapi-tag: ${{ inputs.searchapi-tag }}
+      statsapi-tag: ${{ inputs.statsapi-tag }}
       web-tag: ${{ inputs.web-tag }}
     secrets:
       AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
@@ -37,6 +41,7 @@ jobs:
     with:
       environment: ${{ inputs.target-environment }}
       searchapi-tag: ${{ inputs.searchapi-tag }}
+      statsapi-tag: ${{ inputs.statsapi-tag }}
       web-tag: ${{ inputs.web-tag }}
     secrets:
       AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}

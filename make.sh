@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MICROSERVICES=("web" "searchapi")
+MICROSERVICES=("web" "searchapi", "statsapi")
 
 # AWS variables
 AWS_PROFILE=default
@@ -65,20 +65,6 @@ kube-config() {
   aws eks update-kubeconfig \
     --name $(terraform output -raw cluster_name) \
     --region $(terraform output -raw region)
-}
-
-# Install all apps + helm charts
-kube-install() {
-  # Install ArgoCD
-  cd "$PROJECT_DIR"
-  kubectl create namespace argocd
-  kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-
-  # Install all the charts
-  for chart in mysql redis searchapi web; do
-    cd "$PROJECT_DIR/charts/$chart"
-    helm install "$chart" .
-  done
 }
 
 # publish the 1.0.0 version
