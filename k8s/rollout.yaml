@@ -4,7 +4,7 @@ metadata:
   name: searchapi
   namespace: ${NAMESPACE}
 spec:
-  replicas: 3
+  replicas: 1
   revisionHistoryLimit: 2
   selector:
     matchLabels:
@@ -43,7 +43,7 @@ metadata:
   name: web
   namespace: ${NAMESPACE}
 spec:
-  replicas: 3
+  replicas: 1
   revisionHistoryLimit: 2
   selector:
     matchLabels:
@@ -90,7 +90,7 @@ metadata:
   name: statsapi
   namespace: ${NAMESPACE}
 spec:
-  replicas: 3
+  replicas: 1
   revisionHistoryLimit: 2
   selector:
     matchLabels:
