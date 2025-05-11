@@ -11,9 +11,8 @@ This repository provides infrastructure-as-code for deploying and managing a com
 - Blue/Green deployment strategy with Argo Rollouts
 - ECR repository management
 
-## Architecture
-
-![Architecture Diagram](https://via.placeholder.com/800x400?text=Architecture+Diagram)
+## Architecture and Deployment Strategy
+![AWS EKS Infra](https://github.com/user-attachments/assets/f84f969a-cc31-4095-8144-f6d51fd05bab)
 
 ### Components
 
