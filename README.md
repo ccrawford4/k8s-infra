@@ -1,142 +1,177 @@
-# EKS Kubernetes Cluster Infrastructure and CI/CD for Blue/Green Deployments with Argo Rollouts
+# EKS Infrastructure with Blue/Green Deployments
 
-## Features
+Infrastructure repo for deploying microservices to Amazon EKS with blue/green deployments using Argo Rollouts.
 
-1. Github actions (CI/CD) for deploying to **EKS**.
-2. Terraform modules for deploying one EKS Cluster and two RDS instances.
-3. Scripts for creating/deleting ECR repositories.
-4. Kubernetes manifests for deploying three microservices.
+## Overview
 
-## Microservices
+This repository provides infrastructure-as-code for deploying and managing a complete microservices architecture on AWS EKS. It includes:
 
-The infrastrucure is designed to deploy three microservices:
+- Terraform modules for EKS cluster and RDS database provisioning
+- CI/CD pipelines using GitHub Actions
+- Blue/Green deployment strategy with Argo Rollouts
+- ECR repository management
 
-1. [Next.js frontend]("https://github.com/ccrawford4/search-app")
-2. [Golang SearchAPI](https://github.com/ccrawford4/search)
-3. [Golang StatsAPI](https://github.com/ccrawford4/stats)
+## Architecture
 
-## Additional Services
+![Architecture Diagram](https://via.placeholder.com/800x400?text=Architecture+Diagram)
 
-The infrastructure also deploys the following services:
+### Components
 
-1. MySQL RDS instance
-2. Redis Cache
+| Component | Description |
+|-----------|-------------|
+| **EKS Cluster** | Kubernetes cluster for orchestrating containerized applications |
+| **RDS Instances** | Two MySQL database instances for different environments |
+| **ECR Repositories** | Container registries for microservice images |
+| **Argo Rollouts** | Controller for progressive delivery and blue/green deployments |
+| **Redis Cache** | In-memory data store for caching |
+
+### Microservices
+
+The infrastructure is designed to deploy three microservices:
+
+1. [Next.js Frontend](https://github.com/ccrawford4/search-app) - Web interface
+2. [Golang SearchAPI](https://github.com/ccrawford4/search) - Search functionality
+3. [Golang StatsAPI](https://github.com/ccrawford4/stats) - Analytics and statistics
 
 ## Prerequisites
 
-Ensure your github repo is configured with the following environment secrets:
+- AWS CLI configured with appropriate permissions
+- Terraform (>= 1.0.0)
+- kubectl (>= 1.22.0)
+- Argo Rollouts plugin (`brew install argoproj/tap/argo-rollouts`)
+- GitHub account with access to the microservice repositories
 
-1. Environment zero: "qa": (quality assurance)
-2. Environment one: "uat" (user acceptance testing)
-3. Environment two: "prod" (production)
+## Setup Instructions
 
-Secrets:
+### 1. Repository Configuration
 
-- 'DSN': The Database Connection String used by the SearchAPI and StatsAPI.
-- 'HOSTNAME': The hostname of the Ingress. E.g. 'qa.example.com', 'uat.example.com', 'prod.example.com'.
+Configure the following GitHub repository secrets:
 
-Repository Secrets:
+**Environment Secrets** (for each of: `qa`, `uat`, and `prod`):
 
-- 'AWS_ACCESS_KEY_ID': AWS Access Key ID (ensure the user has permissions to manage EKS and EC2)
-- 'AWS_ACCOUNT': The AWS Account ID
-- 'AWS_EKS_CLUSTER_NAME': The name of your EKS cluster (default 'eks-cluster')
+- `DSN` - Database connection string
+- `HOSTNAME` - Environment hostname (e.g., `qa.example.com`)
 
-### Usage
+**Repository Secrets**:
 
-Step 1: Clone the repository
+- `AWS_ACCESS_KEY_ID` - AWS access key
+- `AWS_SECRET_ACCESS_KEY` - AWS secret key
+- `AWS_ACCOUNT` - AWS account ID
+- `AWS_EKS_CLUSTER_NAME` - EKS cluster name (default: `eks-cluster`)
+
+### 2. Local Setup
 
 ```bash
+# Clone the repository
 git clone https://github.com/ccrawford4/k8s-infra.git
-```
+cd k8s-infra
 
-Step 2:
-Ensure the following are set correctly in the `make.sh` file:
+# Configure AWS profile and region in make.sh
+# Edit AWS_PROFILE and AWS_REGION variables
 
-1. AWS_PROFILE
-2. AWS_REGION
-
-Step 3: Create a new secrets file and populate it with the correct values.
-
-```bash
-cd infra 
+# Create and populate secrets file
+cd infra
 cp secrets.auto.tfvars.example secrets.auto.tfvars
 ```
 
-Fill in the secrets.auto.tfvars file with the correct values. The secrets.auto.tfvars file is used to populate the terraform variables. The secrets.auto.tfvars file should look like this:
+Edit `secrets.auto.tfvars` with your configuration:
 
 ```hcl
-db_username    = "<The database username for uat and prod>"
-db_password    = "<The database password for uat and prod>"
-db_port_number = "<The database port number for uat and prod>"
+# Required
+db_username    = "admin"
+db_password    = "your-secure-password"
+db_port_number = "3306"
+
+# Optional
+project_name   = "your-project"  # Default: eks-blue-green
+region         = "us-east-1"     # Default: us-east-1
 ```
 
-Additional variables to add (optional):
-
-```hcl
-project_name = "<The project name>" (default is eks-blue-green)
-region = "<The AWS region>" (default is us-east-1)
-```
-
-Step 4. Run the setup command (will run terraform init and create the ECR repositories)
+### 3. Infrastructure Deployment
 
 ```bash
+# Initialize and create ECR repositories
 make setup
-```
 
-Note: If you get an error like this:
-`/make.sh: line 17: \e[48;5;28m ${1^^} \e[0m ${@:2}: bad substitution`
-You may be using an older version of bash. If on MacOS, you can upgrade bash using brew
-
-```bash
-brew install bash
-```
-
-And then call it directly:
-
-```bash
-/opt/homebrew/bin/bash make.sh setup
-```
-
-Step 5. Terraform validate
-
-```bash
+# Validate Terraform configuration
 make tf-validate
-```
 
-Step 6. Terraform Apply
-
-```bash
+# Deploy infrastructure
 make tf-apply
-```
 
-Step 7. Upgrade your kubectl config
-
-```bash
+# Update kubectl configuration
 make kube-config
 ```
 
-Step 8. Push a change to all of the microservice repos to trigger a build and push to their respective ECR repository.
+> **Note**: If you encounter a shell error like:
+>
+> ```
+> /make.sh: line 17: \e[48;5;28m ${1^^} \e[0m ${@:2}: bad substitution
+> ```
+>
+> Use a newer version of bash:
+>
+> ```bash
+> brew install bash
+> /opt/homebrew/bin/bash make.sh setup
+> ```
 
-Step 9. Deploy to QA using the "Nightly Build" workflow dispatch.
+## Deployment Workflow
 
-Step 10. Run argo rollouts locally to see the changes
-Note: ensure you have the argo rollouts plugin installed
+### Initial Deployment
+
+1. Push changes to microservice repositories to trigger builds and ECR pushes
+2. Trigger the "Nightly Build" workflow in GitHub Actions to deploy to QA
+
+### Monitoring Deployments
 
 ```bash
+# Install Argo Rollouts plugin (if not already installed)
 brew install argoproj/tap/argo-rollouts
-```
 
-Then run the following command to see the rollout status:
+# Monitor rollout status
 kubectl argo rollouts get rollout <rollout-name> -n <namespace>
 
+# Start dashboard
+kubectl argo rollouts dashboard
 ```
 
-Open it up at http://localhost:3100
+Access the dashboard at <http://localhost:3100>
 
-Step 11. To deploy to UAT, run the "Promote" workflow disaptch on Github using the following inputs:
-Environment: uat
-tag of searchapi: <the latest qa-<searchapi-tag> you can find in the searchapi ECR repo>
-tag of web image: <same as above but for web>
-tag of statsapi: <same as above but for statsapi>
+### Promoting to Higher Environments
 
-Change the namespace in argo-rollouts in the dashboard at localhost:3100 to uat and monitor the blue/green deployment.
+1. Navigate to GitHub Actions
+2. Select the "Promote" workflow
+3. Use the following inputs:
+   - **Environment**: `uat` or `prod`
+   - **Tag of searchapi**: Latest tag
+   - **Tag of web image**: Latest tag
+   - **Tag of statsapi**: Latest tag
+4. Monitor the deployment in the Argo Rollouts dashboard
+
+## Maintenance
+
+### Cleaning Up Resources
+
+```bash
+# Destroy infrastructure
+make tf-destroy
+```
+
+### Updating Dependencies
+
+Periodically update provider versions in `versions.tf` to maintain security and access new features.
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| EKS connection issues | Ensure `make kube-config` was run successfully |
+| Deployment failures | Check GitHub Actions logs and Argo Rollouts status |
+| Database connectivity | Verify security groups and the `DSN` secret |
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Submit a pull request
