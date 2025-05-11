@@ -5,9 +5,6 @@ MICROSERVICES=("web" "searchapi", "statsapi")
 # AWS variables
 AWS_PROFILE=default
 AWS_REGION=us-east-1
-# project name
-PROJECT_NAME=eks-blue-green
-# the directory containing the script file
 PROJECT_DIR="$(
   cd "$(dirname "$0")"
   pwd
