@@ -12,6 +12,7 @@ This repository provides infrastructure-as-code for deploying and managing a com
 - ECR repository management
 
 ## Architecture and Deployment Strategy
+
 ![AWS EKS Infra](https://github.com/user-attachments/assets/f84f969a-cc31-4095-8144-f6d51fd05bab)
 
 ### Components
@@ -120,7 +121,8 @@ make kube-config
 ### Initial Deployment
 
 1. Push changes to microservice repositories to trigger builds and ECR pushes
-2. Trigger the "Nightly Build" workflow in GitHub Actions to deploy to QA
+2. Navigate to k8s/cluster-issuer.yaml and change line 8 to replace "<your email address>" with your email address
+3. Trigger the "Nightly Build" workflow in GitHub Actions to deploy to QA
 
 ### Monitoring Deployments
 
