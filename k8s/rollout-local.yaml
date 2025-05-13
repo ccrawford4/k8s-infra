@@ -1,0 +1,124 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: searchapi
+  namespace: default
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: searchapi
+  template:
+    metadata:
+      labels:
+        app: searchapi
+        app.kubernetes.io/instance: searchapi
+        app.kubernetes.io/name: searchapi
+    spec:
+      containers:
+        - name: searchapi
+          image: "searchapi:latest"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DSN
+              value: "root:rootpassword@tcp(localhost:3306)/${ENV}?charset=utf8mb4&parseTime=true&loc=Local"
+            - name: REDIS_HOST
+              value: "http://localhost:6379"
+            - name: REDIS_PASSWORD
+              value: "password"
+  strategy:
+    blueGreen:
+      activeService: searchapi
+      previewService: searchapi-preview
+      autoPromotionEnabled: false
+      previewReplicaCount: 3
+      scaleDownDelaySeconds: 300
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: web
+  namespace: default
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+        app.kubernetes.io/instance: web
+        app.kubernetes.io/name: web
+    spec:
+      containers:
+        - name: web
+          image: "web:latest"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          env:
+            - name: API_ENDPOINT
+              value: "http://localhost:8080"
+            - name: NEXTAUTH_URL
+              value: "http://localhost:3000"
+            - name: GITHUB_CLIENT_ID
+              value: "github_client_id"
+            - name: GITHUB_SECRET
+              value: "github_secret"
+            - name: NEXTAUTH_SECRET
+              value: "nextauth_secret"
+            - name: GOOGLE_ID
+              value: "google_id"
+            - name: GOOGLE_SECRET
+              value: "google_secret"
+  strategy:
+    blueGreen:
+      activeService: web
+      previewService: web-preview
+      autoPromotionEnabled: false
+      previewReplicaCount: 3
+      scaleDownDelaySeconds: 300
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: statsapi
+  namespace: default
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: statsapi
+  template:
+    metadata:
+      labels:
+        app: statsapi
+        app.kubernetes.io/instance: statsapi
+        app.kubernetes.io/name: statsapi
+    spec:
+      containers:
+        - name: statsapi
+          image: "statsapi:latest"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DSN
+              value: "root:rootpassword@tcp(localhost:3306)/${ENV}?charset=utf8mb4&parseTime=true&loc=Local"
+            - name: REDIS_HOST
+              value: "http://localhost:6379"
+            - name: REDIS_PASSWORD
+              value: "password"
+  strategy:
+    blueGreen:
+      activeService: statsapi
+      previewService: statsapi-preview
+      autoPromotionEnabled: false
+      previewReplicaCount: 3
+      scaleDownDelaySeconds: 300

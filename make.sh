@@ -42,6 +42,21 @@ setup() {
   bash scripts/ecr-create.sh "${MICROSERVICES[@]}"
 }
 
+build-all() {
+  cd $PROJECT_DIR
+  bash scripts/build.sh
+}
+
+kube-local() {
+  cd $PROJECT_DIR
+  bash scripts/kube-init.sh
+}
+
+delete-all() {
+  cd $PROJECT_DIR
+  bash scripts/delete.sh
+}
+
 # terraform validate
 tf-validate() {
   cd "$PROJECT_DIR/infra"
