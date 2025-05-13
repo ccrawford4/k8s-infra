@@ -7,7 +7,6 @@ PROJECT_DIR="$(
 
 # Download each source code, build the docker image, and tag it
 for repo in search-app search stats; do
-  echo "$PROJECT_DIR"
   cd $PROJECT_DIR
   rm -rf $repo
 done

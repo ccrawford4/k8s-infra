@@ -1,9 +1,8 @@
 #/bin/bash
 
 # Downloads all the source codes and builds the docker images
-
 PROJECT_DIR="$(
-  cd "$(dirname "$0")"
+  cd "$(dirname "$0")"/..
   pwd
 )"
 

@@ -1,7 +1,7 @@
 #/bin/bash
 
 PROJECT_DIR="$(
-  cd "$(dirname "$0")"
+  cd "$(dirname "$0")"/..
   pwd
 )"
 
@@ -49,4 +49,4 @@ for env in qa uat prod; do
 done
 
 # Deploy the ingress
-kubectl apply -f $PROJECT_DIR/k8s/ingress.yaml
+kubectl apply -f $PROJECT_DIR/k8s/ingress-local.yaml
