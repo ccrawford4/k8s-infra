@@ -5,6 +5,13 @@ PROJECT_DIR="$(
   pwd
 )"
 
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 <docker_username>"
+  exit 1
+fi
+
+DOCKER_USERNAME="$1"
+
 # Create namespaces if they do not exist already
 for n in qa uat prod ingress-nginx argo-rollouts; do
   kubectl get namespace $n || kubectl create namespace $n
@@ -30,9 +37,9 @@ for env in qa uat prod; do
   envsubst <k8s/rollout-local.yaml | kubectl -n $env apply -f -
 
   # Update the images
-  kubectl argo rollouts set image searchapi searchapi="searchapi:latest" -n $env
-  kubectl argo rollouts set image web web="web:latest" -n $env
-  kubectl argo rollouts set image statsapi statsapi="statsapi:latest" -n $env
+  kubectl argo rollouts set image searchapi searchapi="$DOCKER_USERNAME/searchapi:latest" -n $env
+  kubectl argo rollouts set image web web="$DOCKER_USERNAME/web:latest" -n $env
+  kubectl argo rollouts set image statsapi statsapi="$DOCKER_USERNAME/statsapi:latest" -n $env
 
   # Upgrade the mysql chart or install it if it does not exist
   cd $PROJECT_DIR/charts/mysql

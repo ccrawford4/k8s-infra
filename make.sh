@@ -20,6 +20,8 @@ error() { echo -e "\e[48;5;196m ${1^^} \e[0m ${@:2}" >&2; } # $1 uppercase backg
 # https://unix.stackexchange.com/a/22867
 export -f log info warn error
 
+DOCKER_USERNAME="$2"
+
 # log $1 in underline then $@ then a newline
 under() {
   local arg=$1
@@ -44,12 +46,12 @@ setup() {
 
 build-all() {
   cd $PROJECT_DIR
-  bash scripts/build.sh
+  bash scripts/build.sh $DOCKER_USERNAME
 }
 
 kube-local() {
   cd $PROJECT_DIR
-  bash scripts/kube-init.sh
+  bash scripts/kube-init.sh $DOCKER_USERNAME
 }
 
 delete-all() {
