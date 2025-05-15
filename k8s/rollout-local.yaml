@@ -2,7 +2,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: searchapi
-  namespace: default
 spec:
   replicas: 1
   revisionHistoryLimit: 2
@@ -41,7 +40,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: web
-  namespace: default
 spec:
   replicas: 1
   revisionHistoryLimit: 2
@@ -88,7 +86,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: statsapi
-  namespace: default
 spec:
   replicas: 1
   revisionHistoryLimit: 2

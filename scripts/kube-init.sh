@@ -20,12 +20,14 @@ helm upgrade --install ingress-nginx ingress-nginx \
 
 # Install Applications on each namespace
 for env in qa uat prod; do
+  cd $PROJECT_DIR
+
   # Deploy the services for the applications
-  kubectl -n $env apply -f $PROJECT_DIR/k8s/service.yaml
+  kubectl -n $env apply -f k8s/service.yaml
 
   # Deploy the local rollout configuration
   export ENV=$env
-  envsubst <$PROJECT_DIR/k8s/rollout-local.yaml | kubectl -n $env apply -f
+  envsubst <k8s/rollout-local.yaml | kubectl -n $env apply -f -
 
   # Update the images
   kubectl argo rollouts set image searchapi searchapi="searchapi:latest" -n $env
