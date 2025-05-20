@@ -32,9 +32,10 @@ for env in qa uat prod; do
   # Deploy the services for the applications
   kubectl -n $env apply -f k8s/service.yaml
 
-  # Deploy the local rollout configuration
+  # Deploy the local rollout configuration if the rollout has not been applied yet
   export ENV=$env
-  envsubst <k8s/rollout-local.yaml | kubectl -n $env apply -f -
+  export DOCKER_USERNAME=$DOCKER_USERNAME
+  kubectl get rollout -n $env | envsubst <k8s/rollout-local.yaml | kubectl -n $env apply -f -
 
   # Update the images
   kubectl argo rollouts set image searchapi searchapi="$DOCKER_USERNAME/searchapi:latest" -n $env

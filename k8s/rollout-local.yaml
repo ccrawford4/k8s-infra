@@ -17,15 +17,15 @@ spec:
     spec:
       containers:
         - name: searchapi
-          image: "searchapi:latest"
+          image: "${DOCKER_USERNAME}/searchapi:latest"
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:
             - name: DSN
-              value: "root:rootpassword@tcp(localhost:3306)/${ENV}?charset=utf8mb4&parseTime=true&loc=Local"
+              value: "root:rootpassword@tcp(mysql.${ENV}.svc.cluster.local:3306)/${ENV}?charset=utf8mb4&parseTime=true&loc=Local"
             - name: REDIS_HOST
-              value: "http://localhost:6379"
+              value: "redis.${ENV}.svc.cluster.local:6379"
             - name: REDIS_PASSWORD
               value: "password"
   strategy:
@@ -61,9 +61,9 @@ spec:
             - containerPort: 3000
           env:
             - name: API_ENDPOINT
-              value: "http://localhost:8080"
+              value: "http://${ENV}.localhost:8080"
             - name: NEXTAUTH_URL
-              value: "http://localhost:3000"
+              value: "http://${ENV}.localhost:3000"
             - name: GITHUB_CLIENT_ID
               value: "github_client_id"
             - name: GITHUB_SECRET
@@ -101,15 +101,15 @@ spec:
     spec:
       containers:
         - name: statsapi
-          image: "statsapi:latest"
+          image: "${DOCKER_USERNAME}/statsapi:latest"
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:
             - name: DSN
-              value: "root:rootpassword@tcp(localhost:3306)/${ENV}?charset=utf8mb4&parseTime=true&loc=Local"
+              value: "root:rootpassword@tcp(mysql.${ENV}.svc.cluster.local:3306)/${ENV}?charset=utf8mb4&parseTime=true&loc=Local"
             - name: REDIS_HOST
-              value: "http://localhost:6379"
+              value: "redis.${ENV}.svc.cluster.local:6379"
             - name: REDIS_PASSWORD
               value: "password"
   strategy:
