@@ -68,6 +68,9 @@ docker login
 # Build all microservice images and push to your Docker Hub
 ./make.sh build-all <your-docker-username>
 
+# Ensure you are using the correct Docker context. If using docker desktop:
+kubectl config use-context docker-desktop
+
 # Deploy the complete stack locally
 ./make.sh kube-local <your-docker-username>
 ```
