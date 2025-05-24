@@ -292,4 +292,4 @@ kubectl get ingress -o yaml -n <namespace>
 
 ```bash
 # Remove all infrastructure 
-make tf-destroy. Submit a pull request
+make tf-destroy. 
