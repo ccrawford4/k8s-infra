@@ -296,3 +296,15 @@ kubectl get ingress -o yaml -n <namespace>
 ```bash
 # Remove all infrastructure 
 make tf-destroy. 
+```
+
+## Optional
+
+1. Datadog
+To include datadog metrics and monitoring, run the following:
+
+```bash
+helm repo add datadog https://helm.datadoghq.com
+helm repo update
+kubectl create secret generic datadog-secret --from-literal api-key=<your-datadog-api-key>
+```

@@ -5,12 +5,41 @@ PROJECT_DIR="$(
   pwd
 )"
 
-if [ $# -ne 1 ]; then
-  echo "Usage: $0 <docker_username>"
-  exit 1
+# Parse command line arguments
+if [ $# -lt 1 ]; then
+  error "error" "Docker username is required"
+  usage
 fi
 
 DOCKER_USERNAME="$1"
+shift
+
+# Parse remaining arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+  --datadog-api-key=*)
+    DATADOG_API_KEY="${1#*=}"
+    DATADOG_ENABLED=true
+    shift
+    ;;
+  --help | -h)
+    usage
+    ;;
+  *)
+    warn "warning" "Unknown option: $1"
+    shift
+    ;;
+  esac
+done
+
+# Validate Datadog configuration
+if [[ "$DATADOG_ENABLED" == "true" ]]; then
+  if [[ -z "$DATADOG_API_KEY" ]]; then
+    error "error" "Datadog API key cannot be empty when Datadog is enabled"
+    exit 1
+  fi
+  info "datadog" "Datadog monitoring will be configured"
+fi
 
 # Create namespaces if they do not exist already
 for n in qa uat prod ingress-nginx argo-rollouts; do
@@ -24,6 +53,20 @@ kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/rele
 helm upgrade --install ingress-nginx ingress-nginx \
   --repo https://kubernetes.github.io/ingress-nginx \
   --namespace ingress-nginx
+
+# Deploy Datadog if enabled
+if [[ "$DATADOG_ENABLED" == "true" ]]; then
+  info "datadog" "Setting up Datadog monitoring..."
+  kubectl get namespace datadog || kubectl create namespace datadog
+
+  helm repo add datadog https://helm.datadoghq.com
+  helm install datadog-operator datadog/datadog-operator
+  kubectl create secret generic datadog-secret --from-literal api-key=$DATADOG_API_KEY || echo "secret already exists"
+
+  info "datadog" "Datadog monitoring setup completed"
+else
+  info "k8s" "Skipping Datadog setup (not enabled)"
+fi
 
 # Install Applications on each namespace
 for env in qa uat prod; do
@@ -56,7 +99,18 @@ for env in qa uat prod; do
   helm -n $env upgrade --install \
     --set password=password \
     redis .
+
+  # If datadog is enabled,
+  if [[ "$DATADOG_ENABLED" == "true" ]]; then
+    echo "Applying Datadog agent for $env environment..."
+    cd "$PROJECT_DIR"
+    echo "Creating Datadog agent config for $env environment..."
+    kubectl -n $env apply -f k8s/datadog-agent.yaml
+  fi
 done
+
+echo "Pausing for 5 seconds to allow the services to start... Do NOT Interrupt!"
+sleep 5
 
 # Deploy the ingress
 kubectl apply -f $PROJECT_DIR/k8s/ingress-local.yaml
