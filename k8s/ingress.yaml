@@ -36,7 +36,7 @@ spec:
               service:
                 name: statsapi
                 port:
-                  number: 8080
+                  number: 8081
           - path: /
             pathType: Prefix
             backend:
@@ -83,7 +83,7 @@ spec:
               service:
                 name: statsapi
                 port:
-                  number: 8080
+                  number: 8081
           - path: /
             pathType: Prefix
             backend:
@@ -130,7 +130,7 @@ spec:
               service:
                 name: statsapi
                 port:
-                  number: 8080
+                  number: 8081
           - path: /
             pathType: Prefix
             backend:

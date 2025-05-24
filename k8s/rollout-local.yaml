@@ -15,6 +15,12 @@ spec:
         app.kubernetes.io/instance: searchapi
         app.kubernetes.io/name: searchapi
     spec:
+      hostAliases:
+        - ip: "192.168.65.254"
+          hostnames:
+            - "qa.localhost"
+            - "uat.localhost"
+            - "localhost"
       containers:
         - name: searchapi
           image: "${DOCKER_USERNAME}/searchapi:latest"
@@ -33,7 +39,7 @@ spec:
       activeService: searchapi
       previewService: searchapi-preview
       autoPromotionEnabled: false
-      previewReplicaCount: 3
+      previewReplicaCount: 1
       scaleDownDelaySeconds: 300
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -53,15 +59,21 @@ spec:
         app.kubernetes.io/instance: web
         app.kubernetes.io/name: web
     spec:
+      hostAliases:
+        - ip: "192.168.65.254"
+          hostnames:
+            - "qa.localhost"
+            - "uat.localhost"
+            - "localhost"
       containers:
         - name: web
-          image: "web:latest"
+          image: "${DOCKER_USERNAME}/web:latest"
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
           env:
             - name: API_ENDPOINT
-              value: "http://${ENV}.localhost:8080"
+              value: "http://${ENV}.localhost/search"
             - name: NEXTAUTH_URL
               value: "http://${ENV}.localhost:3000"
             - name: GITHUB_CLIENT_ID
@@ -79,7 +91,7 @@ spec:
       activeService: web
       previewService: web-preview
       autoPromotionEnabled: false
-      previewReplicaCount: 3
+      previewReplicaCount: 1
       scaleDownDelaySeconds: 300
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -99,12 +111,18 @@ spec:
         app.kubernetes.io/instance: statsapi
         app.kubernetes.io/name: statsapi
     spec:
+      hostAliases:
+        - ip: "192.168.65.254"
+          hostnames:
+            - "qa.localhost"
+            - "uat.localhost"
+            - "localhost"
       containers:
         - name: statsapi
           image: "${DOCKER_USERNAME}/statsapi:latest"
           imagePullPolicy: Always
           ports:
-            - containerPort: 8080
+            - containerPort: 8081
           env:
             - name: DSN
               value: "root:rootpassword@tcp(mysql.${ENV}.svc.cluster.local:3306)/${ENV}?charset=utf8mb4&parseTime=true&loc=Local"
@@ -117,5 +135,5 @@ spec:
       activeService: statsapi
       previewService: statsapi-preview
       autoPromotionEnabled: false
-      previewReplicaCount: 3
+      previewReplicaCount: 1
       scaleDownDelaySeconds: 300

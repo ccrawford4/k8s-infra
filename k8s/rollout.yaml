@@ -107,7 +107,7 @@ spec:
           image: "${ECR_REGISTRY}/statsapi:${IMAGE_TAG}"
           imagePullPolicy: Always
           ports:
-            - containerPort: 8080
+            - containerPort: 8081
           env:
             - name: DSN
               value: ${DSN}

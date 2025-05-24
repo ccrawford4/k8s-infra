@@ -54,6 +54,11 @@ kube-local() {
   bash scripts/kube-init.sh $DOCKER_USERNAME
 }
 
+destroy-local() {
+  cd "$PROJECT_DIR"
+  bash scripts/kube-destroy.sh
+}
+
 delete-all() {
   cd $PROJECT_DIR
   bash scripts/delete.sh

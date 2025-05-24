@@ -33,146 +33,263 @@ The infrastructure is designed to deploy three microservices:
 2. [Golang SearchAPI](https://github.com/ccrawford4/search) - Search functionality
 3. [Golang StatsAPI](https://github.com/ccrawford4/stats) - Analytics and statistics
 
-## Prerequisites
+## Quick Start
 
-- AWS CLI configured with appropriate permissions
-- Terraform (>= 1.0.0)
-- kubectl (>= 1.22.0)
-- Argo Rollouts plugin (`brew install argoproj/tap/argo-rollouts`)
-- GitHub account with access to the microservice repositories
+### Prerequisites
 
-## Setup Instructions
-
-### 1. Repository Configuration
-
-Configure the following GitHub repository secrets:
-
-**Environment Secrets** (for each of: `qa`, `uat`, and `prod`):
-
-- `DSN` - Database connection string
-- `HOSTNAME` - Environment hostname (e.g., `qa.example.com`)
-
-**Repository Secrets**:
-
-- `AWS_ACCESS_KEY_ID` - AWS access key
-- `AWS_SECRET_ACCESS_KEY` - AWS secret key
-- `AWS_ACCOUNT` - AWS account ID
-- `AWS_EKS_CLUSTER_NAME` - EKS cluster name (default: `eks-cluster`)
-
-### 2. Local Setup
+Ensure you have the following tools installed:
 
 ```bash
-# Clone the repository
+# Required tools
+aws --version        # AWS CLI v2.0+
+terraform --version  # Terraform v1.0+
+kubectl version      # kubectl v1.22+
+docker --version     # Docker Desktop
+
+# Optional but recommended
+brew install argoproj/tap/argo-rollouts  # Argo Rollouts CLI
+```
+
+### Local Development Setup
+
+**Step 1: Clone and Configure**
+
+```bash
 git clone https://github.com/ccrawford4/k8s-infra.git
 cd k8s-infra
 
-# Configure AWS profile and region in make.sh
-# Edit AWS_PROFILE and AWS_REGION variables
+# Configure your Docker credentials
+docker login
+```
 
-# Create and populate secrets file
+**Step 2: Build and Deploy Locally**
+
+```bash
+# Build all microservice images and push to your Docker Hub
+./make.sh build-all <your-docker-username>
+
+# Deploy the complete stack locally
+./make.sh kube-local <your-docker-username>
+```
+
+**Step 3: Access the Applications**
+
+```bash
+# Start the Argo Rollouts dashboard
+kubectl argo rollouts dashboard &
+
+# Access your applications
+open http://qa.localhost      # QA environment
+open http://uat.localhost     # UAT environment  
+open http://prod.localhost    # Production environment
+open http://localhost:3100    # Argo Rollouts dashboard
+```
+
+**Step 4: Seed Test Data**
+
+```bash
+# Add sample data to each environment
+curl -X POST http://qa.localhost/crawl \
+  -H "Content-Type: application/json" \
+  -d '{"Host": "https://example.com"}'
+
+curl -X POST http://uat.localhost/crawl \
+  -H "Content-Type: application/json" \
+  -d '{"Host": "https://news.ycombinator.com"}'
+```
+
+> **Note**: Large websites may overwhelm local containers. Use smaller sites for testing.
+
+**Step 5: Cleanup**
+
+```bash
+# Remove local cluster and resources
+./make.sh destroy-local
+```
+
+## Production Deployment
+
+### AWS Infrastructure Setup
+
+**Step 1: Configure Secrets**
+
+Create `infra/secrets.auto.tfvars` from the example:
+
+```bash
 cd infra
 cp secrets.auto.tfvars.example secrets.auto.tfvars
 ```
 
-Edit `secrets.auto.tfvars` with your configuration:
+Edit the secrets file:
 
 ```hcl
-# Required
+# Database Configuration
 db_username    = "admin"
-db_password    = "your-secure-password"
+db_password    = "your-secure-password-here"
 db_port_number = "3306"
 
-# Optional
-project_name   = "your-project"  # Default: eks-blue-green
-region         = "us-east-1"     # Default: us-east-1
+# Optional Overrides
+project_name   = "my-awesome-project"  # Default: eks-blue-green  
+region         = "us-west-2"           # Default: us-east-1
 ```
 
-### 3. Infrastructure Deployment
+**Step 2: GitHub Repository Configuration**
+
+Configure these secrets in your GitHub repository settings:
+
+**Environment Secrets** (create for `qa`, `uat`, `prod`):
+
+```
+DSN=mysql://username:password@hostname:3306/database
+HOSTNAME=qa.yourdomain.com
+```
+
+**Repository Secrets**:
+
+```
+AWS_ACCESS_KEY_ID=AKIA...
+AWS_SECRET_ACCESS_KEY=...
+AWS_ACCOUNT=123456789012
+AWS_EKS_CLUSTER_NAME=eks-cluster
+```
+
+**Step 3: Deploy Infrastructure**
 
 ```bash
-# Initialize and create ECR repositories
+# Initialize ECR repositories
 make setup
 
-# Validate Terraform configuration
+# Validate Terraform configuration  
 make tf-validate
 
-# Deploy infrastructure
+# Deploy AWS infrastructure
 make tf-apply
 
-# Update kubectl configuration
+# Configure kubectl access
 make kube-config
 ```
 
-> **Note**: If you encounter a shell error like:
->
-> ```
-> /make.sh: line 17: \e[48;5;28m ${1^^} \e[0m ${@:2}: bad substitution
-> ```
->
-> Use a newer version of bash:
+> **Shell Compatibility**: If you encounter bash substitution errors, use a newer bash version:
 >
 > ```bash
 > brew install bash
 > /opt/homebrew/bin/bash make.sh setup
 > ```
 
-## Deployment Workflow
+### Deployment Pipeline
 
-### Initial Deployment
+**Initial Deployment Flow:**
 
-1. Push changes to microservice repositories to trigger builds and ECR pushes
-2. Navigate to k8s/cluster-issuer.yaml and change line 8 to replace "<your email address>" with your email address
-3. Trigger the "Nightly Build" workflow in GitHub Actions to deploy to QA
+1. Update the cluster issuer email in `k8s/cluster-issuer.yaml` (line 8)
+2. Push code changes to microservice repositories
+3. Images are automatically built and pushed to ECR
+4. Trigger "Nightly Build" workflow for QA deployment
+5. Monitor rollout progress in Argo dashboard
 
-### Monitoring Deployments
+**Environment Promotion:**
 
-```bash
-# Install Argo Rollouts plugin (if not already installed)
-brew install argoproj/tap/argo-rollouts
+1. Navigate to GitHub Actions → "Promote" workflow
+2. Configure promotion parameters:
+   - **Target Environment**: `uat` or `prod`
+   - **SearchAPI Tag**: `v1.2.3`
+   - **Frontend Tag**: `v1.2.3`
+   - **StatsAPI Tag**: `v1.2.3`
+3. Execute workflow and monitor deployment
 
-# Monitor rollout status
-kubectl argo rollouts get rollout <rollout-name> -n <namespace>
+## Monitoring and Operations
 
-# Start dashboard
-kubectl argo rollouts dashboard
-```
-
-Access the dashboard at <http://localhost:3100>
-
-### Promoting to Higher Environments
-
-1. Navigate to GitHub Actions
-2. Select the "Promote" workflow
-3. Use the following inputs:
-   - **Environment**: `uat` or `prod`
-   - **Tag of searchapi**: Latest tag
-   - **Tag of web image**: Latest tag
-   - **Tag of statsapi**: Latest tag
-4. Monitor the deployment in the Argo Rollouts dashboard
-
-## Maintenance
-
-### Cleaning Up Resources
+### Deployment Monitoring
 
 ```bash
-# Destroy infrastructure
-make tf-destroy
+# Watch specific rollout
+kubectl argo rollouts get rollout search-api -n production --watch
+
+# List all rollouts across namespaces
+kubectl argo rollouts list rollouts --all-namespaces
+
+# View rollout history
+kubectl argo rollouts history rollout search-api -n production
 ```
 
-### Updating Dependencies
+### Common Operations
 
-Periodically update provider versions in `versions.tf` to maintain security and access new features.
+**Manual Rollout Control:**
+
+```bash
+# Promote to next step
+kubectl argo rollouts promote search-api -n production
+
+# Abort rollout
+kubectl argo rollouts abort search-api -n production
+
+# Restart rollout
+kubectl argo rollouts restart search-api -n production
+```
+
+**Health Checks:**
+
+```bash
+# Check cluster status
+kubectl get nodes
+
+# Verify all pods
+kubectl get pods --all-namespaces
+
+# Check ingress status
+kubectl get ingress --all-namespaces
+```
+
+## Configuration Reference
+
+### Environment Variables
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `AWS_PROFILE` | AWS CLI profile name | `default` | No |
+| `AWS_REGION` | AWS deployment region | `us-east-1` | No |
+| `PROJECT_NAME` | Infrastructure project name | `eks-blue-green` | No |
+| `CLUSTER_NAME` | EKS cluster identifier | `eks-cluster` | No |
+
+### Terraform Variables
+
+| Variable | Type | Description | Default |
+|----------|------|-------------|---------|
+| `db_username` | string | RDS master username | Required |
+| `db_password` | string | RDS master password | Required |
+| `db_port_number` | string | Database port | `3306` |
+| `project_name` | string | Resource naming prefix | `eks-blue-green` |
+| `region` | string | AWS region | `us-east-1` |
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| EKS connection issues | Ensure `make kube-config` was run successfully |
-| Deployment failures | Check GitHub Actions logs and Argo Rollouts status |
-| Database connectivity | Verify security groups and the `DSN` secret |
+### Common Issues and Solutions
 
-## Contributing
+| Problem | Symptoms | Solution |
+|---------|----------|----------|
+| **EKS Access Denied** | `kubectl` commands fail with permission errors | Run `make kube-config` to update credentials |
+| **Rollout Stuck** | Deployment hangs at analysis phase | Check health checks and promote manually if needed |
+| **Database Connection** | Apps can't connect to RDS | Verify security groups and DSN format |
+| **Image Pull Errors** | Pods stuck in `ImagePullBackOff` | Confirm ECR permissions and image tags |
+| **Local DNS Issues** | Can't access `*.localhost` domains | Ensure Docker Desktop's Kubernetes is enabled |
 
-1. Fork the repository
-2. Create a feature branch
-3. Submit a pull request
+### Debug Commands
+
+```bash
+# Get detailed pod information
+kubectl describe pod <pod-name> -n <namespace>
+
+# View application logs
+kubectl logs -f deployment/<app-name> -n <namespace>
+
+# Check rollout events
+kubectl describe rollout <rollout-name> -n <namespace>
+
+# Validate ingress configuration
+kubectl get ingress -o yaml -n <namespace>
+```
+
+### Resource Cleanup
+
+```bash
+# Remove all infrastructure 
+make tf-destroy. Submit a pull request

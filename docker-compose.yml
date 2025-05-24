@@ -35,7 +35,7 @@ services:
   statsapi:
     image: ${STATSAPI_IMAGE_URI}
     ports:
-      - "8080:8080"
+      - "8081:8081"
     depends_on:
       mysql:
         condition: service_healthy
