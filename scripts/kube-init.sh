@@ -56,6 +56,10 @@ for env in qa uat prod; do
   helm -n $env upgrade --install \
     --set password=password \
     redis .
+
+  # Install the ingress for the application
+  cd "$PROJECT_DIR"
+  kubectl -n $env apply -f k8s/ingress-local.yaml
 done
 
 # Deploy the ingress

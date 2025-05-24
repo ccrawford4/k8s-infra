@@ -81,7 +81,7 @@ kubectl argo rollouts dashboard &
 # Access your applications
 open http://qa.localhost      # QA environment
 open http://uat.localhost     # UAT environment  
-open http://prod.localhost    # Production environment
+open http://localhost         # Production environment
 open http://localhost:3100    # Argo Rollouts dashboard
 ```
 
